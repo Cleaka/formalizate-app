@@ -750,7 +750,11 @@
                             userData.answers[question.id] = opt;
                             qOptions.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
                             btn.classList.add('selected');
-                            setTimeout(nextQuestion, 200);
+                            
+                            // Solo avanzar automáticamente si NO es la última pregunta
+                            if (currentQuestionIndex < totalQuestions - 1) {
+                                setTimeout(nextQuestion, 200);
+                            }
                         };
                         qOptions.appendChild(btn);
                     });
@@ -790,7 +794,9 @@
             prevQuestionBtn.disabled = (index === 0);
             nextQuestionBtn.textContent = (index === totalQuestions - 1) ? 'Finalizar Evaluación 🏁' : 'Siguiente ➡️';
             
-            nextQuestionBtn.style.display = (question.type === 'binary' || question.type === 'options') ? 'none' : 'inline-block';
+            // CORRECCIÓN: Mostrar siempre el botón en la última pregunta
+            nextQuestionBtn.style.display = (index === totalQuestions - 1) ? 'inline-block' : 
+                                           (question.type === 'binary' || question.type === 'options') ? 'none' : 'inline-block';
 
             updateProgress();
         }
