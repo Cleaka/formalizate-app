@@ -794,9 +794,8 @@
             prevQuestionBtn.disabled = (index === 0);
             nextQuestionBtn.textContent = (index === totalQuestions - 1) ? 'Finalizar Evaluación 🏁' : 'Siguiente ➡️';
             
-            // CORRECCIÓN: Mostrar siempre el botón en la última pregunta
-            nextQuestionBtn.style.display = (index === totalQuestions - 1) ? 'inline-block' : 
-                                           (question.type === 'binary' || question.type === 'options') ? 'none' : 'inline-block';
+            // CORRECCIÓN COMPLETA: Mostrar siempre el botón en todas las preguntas
+            nextQuestionBtn.style.display = 'inline-block';
 
             updateProgress();
         }
@@ -804,8 +803,11 @@
         function nextQuestion() {
             const question = currentQuestionSet[currentQuestionIndex];
             
+            // Validar que la pregunta tenga respuesta
             const answer = userData.answers[question.id];
-            if (!answer || (question.type === 'dimensions' && (!answer.largo || !answer.ancho))) {
+            if (!answer || 
+                (question.type === 'dimensions' && (!answer.largo || !answer.ancho)) ||
+                (question.type === 'number' && !answer.trim())) {
                 alert('Por favor, responde la pregunta.');
                 return;
             }
