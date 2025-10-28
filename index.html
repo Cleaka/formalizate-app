@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Osinergmin - Asistente de Formalización (GLP)</title>
     <style>
-        /* (Estilos CSS) */
         :root {
             --primary: #005A9C;
             --secondary: #00A9E0;
@@ -356,10 +355,10 @@
 
     <script>
         // --- CONSTANTES ---
-        const TRANSFORMER_MIN_DISTANCE = 7.6;
-        const VENTILATION_MIN_AREA = 6;
+        const TRANSFORMERMINDISTANCE = 7.6;
+        const VENTILATIONMINAREA = 6;
         const WALL_CLEARANCE = 4.6;
-        const MIN_DIMENSION_TOTAL = WALL_CLEARANCE * 2;
+        const MINDIMENSIONTOTAL = WALL_CLEARANCE * 2;
 
         // --- PREGUNTAS ---
         const questionSets = {
@@ -391,13 +390,13 @@
                 },
                 {
                     id: 'transformer_distance',
-                    text: `¿A cuántos metros está el transformador de tu RACK?`,
+                    text: '¿A cuántos metros está el transformador de tu RACK?',
                     type: 'number',
-                    helpText: `Mide en línea recta desde donde irá el rack hasta el transformador. La distancia mínima es ${TRANSFORMER_MIN_DISTANCE} metros.`,
+                    helpText: `Mide en línea recta desde donde irá el rack hasta el transformador. La distancia mínima es ${TRANSFORMERMINDISTANCE} metros.`,
                     critical: true,
                     dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' }, 
-                    condition: (answer) => parseFloat(answer) >= TRANSFORMER_MIN_DISTANCE,
-                    failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMER_MIN_DISTANCE} metros. El riesgo eléctrico es muy alto.`
+                    condition: (answer) => parseFloat(answer) >= TRANSFORMERMINDISTANCE,
+                    failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMERMINDISTANCE} metros. El riesgo eléctrico es muy alto.`
                 }
             ],
             2: [
@@ -412,12 +411,12 @@
                 },
                 {
                     id: 'ventilation_size',
-                    text: `¿Qué tamaño tiene esa ventilación (en metros cuadrados)?`,
+                    text: '¿Qué tamaño tiene esa ventilación (en metros cuadrados)?',
                     type: 'number',
-                    helpText: `Mide el ANCHO y el ALTO de tu reja. Si mide 2m de ancho por 3m de alto, son 6 metros cuadrados. El mínimo es ${VENTILATION_MIN_AREA} m².`,
+                    helpText: `Mide el ANCHO y el ALTO de tu reja. Si mide 2m de ancho por 3m de alto, son 6 metros cuadrados. El mínimo es ${VENTILATIONMINAREA} m².`,
                     critical: true,
-                    condition: (answer) => parseFloat(answer) >= VENTILATION_MIN_AREA,
-                    failureMessage: `La ventilación debe ser de al menos ${VENTILATION_MIN_AREA} metros cuadrados para asegurar que el gas escape si hay una fuga.`
+                    condition: (answer) => parseFloat(answer) >= VENTILATIONMINAREA,
+                    failureMessage: `La ventilación debe ser de al menos ${VENTILATIONMINAREA} metros cuadrados para asegurar que el gas escape si hay una fuga.`
                 },
                 {
                     id: 'businesses',
@@ -437,13 +436,13 @@
                 },
                 {
                     id: 'transformer_distance',
-                    text: `¿A cuántos metros está el transformador de tu ALMACÉN?`,
+                    text: '¿A cuántos metros está el transformador de tu ALMACÉN?',
                     type: 'number',
-                    helpText: `Mide en línea recta desde el borde de tu almacén hasta el transformador. El mínimo es ${TRANSFORMER_MIN_DISTANCE} metros.`,
+                    helpText: `Mide en línea recta desde el borde de tu almacén hasta el transformador. El mínimo es ${TRANSFORMERMINDISTANCE} metros.`,
                     critical: true,
                     dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' }, 
-                    condition: (answer) => parseFloat(answer) >= TRANSFORMER_MIN_DISTANCE,
-                    failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMER_MIN_DISTANCE} metros.`
+                    condition: (answer) => parseFloat(answer) >= TRANSFORMERMINDISTANCE,
+                    failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMERMINDISTANCE} metros.`
                 },
                 {
                     id: 'materials_roof',
@@ -473,7 +472,7 @@
                     failureMessage: 'Las PAREDES no pueden ser de material inflamable (madera, estera, drywall).'
                 },
                 {
-                    id: 'has_electricity_recommendation',
+                    id: 'haselectricityrecommendation',
                     text: '¿Hay cables eléctricos, enchufes o tomacorrientes DENTRO del almacén?',
                     type: 'binary',
                     options: ['Sí, hay cables/enchufes', 'No, no hay nada eléctrico'],
@@ -484,10 +483,10 @@
                     id: 'storage_dimensions',
                     text: 'Ingresa las medidas TOTALES de tu almacén (en metros):',
                     type: 'dimensions',
-                    helpText: `¡Importante! La norma exige 4.6 metros de espacio libre entre los balones y cualquier pared. Esto significa que tu cuarto debe tener un LARGO y ANCHO total de al menos ${MIN_DIMENSION_TOTAL} metros (9.2m) cada uno.`,
+                    helpText: `¡Importante! La norma exige 4.6 metros de espacio libre entre los balones y cualquier pared. Esto significa que tu cuarto debe tener un LARGO y ANCHO total de al menos ${MINDIMENSIONTOTAL} metros (9.2m) cada uno.`,
                     critical: true,
-                    condition: (answer) => parseFloat(answer.largo) >= MIN_DIMENSION_TOTAL && parseFloat(answer.ancho) >= MIN_DIMENSION_TOTAL,
-                    failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu local debe medir al menos ${MIN_DIMENSION_TOTAL} x ${MIN_DIMENSION_TOTAL} metros.`
+                    condition: (answer) => parseFloat(answer.largo) >= MINDIMENSIONTOTAL && parseFloat(answer.ancho) >= MINDIMENSIONTOTAL,
+                    failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu local debe medir al menos ${MINDIMENSIONTOTAL} x ${MINDIMENSIONTOTAL} metros.`
                 }
             ],
             3: [
@@ -509,13 +508,13 @@
                 },
                 {
                     id: 'transformer_distance',
-                    text: `¿A cuántos metros está el transformador de tu ÁREA de almacén?`,
+                    text: '¿A cuántos metros está el transformador de tu ÁREA de almacén?',
                     type: 'number',
-                    helpText: `Mide en línea recta desde el borde de tu almacén hasta el transformador. El mínimo es ${TRANSFORMER_MIN_DISTANCE} metros.`,
+                    helpText: `Mide en línea recta desde el borde de tu almacén hasta el transformador. El mínimo es ${TRANSFORMERMINDISTANCE} metros.`,
                     critical: true,
                     dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' }, 
-                    condition: (answer) => parseFloat(answer) >= TRANSFORMER_MIN_DISTANCE,
-                    failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMER_MIN_DISTANCE} metros.`
+                    condition: (answer) => parseFloat(answer) >= TRANSFORMERMINDISTANCE,
+                    failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMERMINDISTANCE} metros.`
                 },
                 {
                     id: 'materials_roof',
@@ -545,7 +544,7 @@
                     failureMessage: 'Las PAREDES que rodean el local no pueden ser de material inflamable (madera, estera, drywall).'
                 },
                 {
-                    id: 'has_electricity_recommendation',
+                    id: 'haselectricityrecommendation',
                     text: '¿Pasan cables eléctricos o hay enchufes en esa área?',
                     type: 'binary',
                     options: ['Sí, hay cables/enchufes', 'No, no hay nada eléctrico'],
@@ -556,10 +555,10 @@
                     id: 'storage_dimensions',
                     text: 'Ingresa las medidas TOTALES de tu área de almacén (en metros):',
                     type: 'dimensions',
-                    helpText: `¡Importante! La norma exige 4.6 metros de espacio libre entre los balones y cualquier pared. Esto significa que tu área debe tener un LARGO y ANCHO total de al menos ${MIN_DIMENSION_TOTAL} metros (9.2m) cada uno.`,
+                    helpText: `¡Importante! La norma exige 4.6 metros de espacio libre entre los balones y cualquier pared. Esto significa que tu área debe tener un LARGO y ANCHO total de al menos ${MINDIMENSIONTOTAL} metros (9.2m) cada uno.`,
                     critical: true,
-                    condition: (answer) => parseFloat(answer.largo) >= MIN_DIMENSION_TOTAL && parseFloat(answer.ancho) >= MIN_DIMENSION_TOTAL,
-                    failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu área debe medir al menos ${MIN_DIMENSION_TOTAL} x ${MIN_DIMENSION_TOTAL} metros.`
+                    condition: (answer) => parseFloat(answer.largo) >= MINDIMENSIONTOTAL && parseFloat(answer.ancho) >= MINDIMENSIONTOTAL,
+                    failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu área debe medir al menos ${MINDIMENSIONTOTAL} x ${MINDIMENSIONTOTAL} metros.`
                 }
             ]
         };
@@ -665,7 +664,6 @@
             if (currentStep === 1) {
                 progressPercent = 5;
             } else if (currentStep === 2) {
-                // Cálculo de progreso ajustado para el paso 2
                 progressPercent = 10 + (currentQuestionIndex / totalQuestions) * 80;
             } else if (currentStep === 3) {
                 progressPercent = 100;
@@ -678,35 +676,46 @@
         function showQuestion(index) {
             questionDisplay.innerHTML = '';
             
+            // Si el índice está fuera de rango, manejar navegación
             if (index < 0 || index >= totalQuestions) {
-                 if (index < 0) goToStep(1);
-                 else evaluateAnswers(); 
-                 return;
+                if (index < 0) {
+                    goToStep(1);
+                    return;
+                } else {
+                    evaluateAnswers();
+                    return;
+                }
             }
 
             const question = currentQuestionSet[index];
-
+            
+            // Verificar dependencias
             if (question.dependsOn) {
                 const dependency = question.dependsOn;
                 const dependencyAnswer = userData.answers[dependency.id];
                 
                 if (dependencyAnswer !== dependency.value) {
+                    // Saltar esta pregunta y pasar a la siguiente
                     userData.answers[question.id] = 'N/A (Saltada)';
-                    const direction = index > currentQuestionIndex ? 1 : -1; 
-                    const nextIndex = index + direction;
-                    currentQuestionIndex = index; 
-                    showQuestion(nextIndex); 
-                    return; 
+                    const nextIndex = index + 1;
+                    if (nextIndex < totalQuestions) {
+                        showQuestion(nextIndex);
+                    } else {
+                        evaluateAnswers();
+                    }
+                    return;
                 }
             }
 
             currentQuestionIndex = index;
             
+            // Mostrar pregunta
             const qText = document.createElement('div');
             qText.className = 'question-text';
             qText.textContent = question.text;
             questionDisplay.appendChild(qText);
             
+            // Mostrar texto de ayuda si existe
             if (question.helpText) {
                 const qHelp = document.createElement('div');
                 qHelp.className = 'help-text';
@@ -715,152 +724,145 @@
             }
 
             const qOptions = document.createElement('div');
-            qOptions.className = 'answer-options';
-            
             const savedAnswer = userData.answers[question.id];
 
             switch (question.type) {
                 case 'binary':
                 case 'options':
-                    qOptions.classList.add(question.type === 'binary' ? 'binary' : 'full-width');
+                    qOptions.className = `answer-options ${question.type === 'binary' ? 'binary' : ''}`;
+                    
                     question.options.forEach(opt => {
                         const btn = document.createElement('button');
                         btn.className = 'btn-option';
                         btn.textContent = opt;
-                        if(opt === savedAnswer) btn.classList.add('selected');
-                        btn.onclick = () => {
-                            userData.answers[question.id] = opt;
-                            qOptions.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+                        
+                        // Marcar como seleccionado si ya fue respondido
+                        if (savedAnswer === opt) {
                             btn.classList.add('selected');
+                        }
+                        
+                        btn.onclick = () => {
+                            // Remover selección anterior
+                            qOptions.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+                            // Seleccionar actual
+                            btn.classList.add('selected');
+                            // Guardar respuesta
+                            userData.answers[question.id] = opt;
                             
-                            // Lógica de avance automático para opciones
+                            // Avanzar automáticamente si es la última pregunta
                             if (currentQuestionIndex === totalQuestions - 1) {
-                                setTimeout(evaluateAnswers, 200); 
+                                setTimeout(evaluateAnswers, 500);
                             } else {
-                                setTimeout(nextQuestion, 200);
+                                setTimeout(() => showQuestion(currentQuestionIndex + 1), 500);
                             }
                         };
                         qOptions.appendChild(btn);
                     });
                     break;
+                    
                 case 'number':
-                    // --- Inicializar la respuesta si no existe ---
-                    if (savedAnswer === undefined) {
-                        userData.answers[question.id] = ''; 
-                    }
+                    qOptions.className = 'answer-options';
+                    
+                    const inputContainer = document.createElement('div');
+                    inputContainer.style.textAlign = 'center';
+                    inputContainer.style.margin = '20px 0';
                     
                     const inputNum = document.createElement('input');
                     inputNum.type = 'number';
                     inputNum.placeholder = '0.0';
                     inputNum.step = '0.1';
                     inputNum.min = '0';
-                    inputNum.value = (savedAnswer && savedAnswer !== 'N/A') ? savedAnswer : '';
+                    inputNum.style.fontSize = '1.2em';
+                    inputNum.style.padding = '12px';
+                    inputNum.style.width = '200px';
+                    inputNum.style.textAlign = 'center';
                     
-                    // Usar 'input' para guardar el valor inmediatamente
-                    inputNum.oninput = () => { 
-                        userData.answers[question.id] = inputNum.value;
-                    };
-                    
-                    qOptions.appendChild(inputNum);
-                    break;
-                case 'dimensions':
-                    // --- Inicializar la respuesta si no existe ---
-                    if (savedAnswer === undefined || savedAnswer === null) {
-                        userData.answers[question.id] = {largo: '', ancho: ''}; 
+                    // Cargar valor guardado si existe
+                    if (savedAnswer && savedAnswer !== 'N/A (Saltada)') {
+                        inputNum.value = savedAnswer;
                     }
                     
-                    qOptions.className = 'dimensions-grid';
-                    const currentAnswer = userData.answers[question.id]; 
-                    const savedLargo = currentAnswer.largo || '';
-                    const savedAncho = currentAnswer.ancho || '';
-
-                    // Creación de la interfaz para dimensiones
-                    qOptions.innerHTML = `
-                        <label for="dim-largo">Largo (m):</label>
-                        <input type="number" id="dim-largo" placeholder="Ej: 10.0" step="0.1" min="0" value="${savedLargo}">
-                        <label for="dim-ancho">Ancho (m):</label>
-                        <input type="number" id="dim-ancho" placeholder="Ej: 10.0" step="0.1" min="0" value="${savedAncho}">
-                    `;
-                    
-                    const largoInput = document.getElementById('dim-largo');
-                    const anchoInput = document.getElementById('dim-ancho');
-                    
-                    // Eventos para guardar valores al escribir
-                    largoInput.addEventListener('input', () => { 
-                        if (!userData.answers[question.id] || typeof userData.answers[question.id] !== 'object') {
-                             userData.answers[question.id] = {ancho: ''}; // Reparar si se corrompió
-                        }
-                        userData.answers[question.id].largo = largoInput.value;
+                    inputNum.addEventListener('input', function() {
+                        userData.answers[question.id] = this.value;
                     });
                     
-                    anchoInput.addEventListener('input', () => { 
-                        if (!userData.answers[question.id] || typeof userData.answers[question.id] !== 'object') {
-                             userData.answers[question.id] = {largo: ''}; // Reparar si se corrompió
-                        }
-                        userData.answers[question.id].ancho = anchoInput.value;
+                    inputContainer.appendChild(inputNum);
+                    qOptions.appendChild(inputContainer);
+                    break;
+                    
+                case 'dimensions':
+                    qOptions.className = 'dimensions-grid';
+                    
+                    // Inicializar datos si no existen
+                    if (!savedAnswer || typeof savedAnswer !== 'object') {
+                        userData.answers[question.id] = { largo: '', ancho: '' };
+                    }
+                    
+                    qOptions.innerHTML = `
+                        <label for="dim-largo-${question.id}">Largo (m):</label>
+                        <input type="number" id="dim-largo-${question.id}" placeholder="Ej: 10.0" step="0.1" min="0" value="${userData.answers[question.id].largo || ''}">
+                        <label for="dim-ancho-${question.id}">Ancho (m):</label>
+                        <input type="number" id="dim-ancho-${question.id}" placeholder="Ej: 10.0" step="0.1" min="0" value="${userData.answers[question.id].ancho || ''}">
+                    `;
+                    
+                    const largoInput = document.getElementById(`dim-largo-${question.id}`);
+                    const anchoInput = document.getElementById(`dim-ancho-${question.id}`);
+                    
+                    largoInput.addEventListener('input', function() {
+                        userData.answers[question.id].largo = this.value;
+                    });
+                    
+                    anchoInput.addEventListener('input', function() {
+                        userData.answers[question.id].ancho = this.value;
                     });
                     break;
             }
             
             questionDisplay.appendChild(qOptions);
             
+            // Configurar botones de navegación
             prevQuestionBtn.disabled = (index === 0);
-            
-            // Texto del botón al final
             nextQuestionBtn.textContent = (index === totalQuestions - 1) ? 'Finalizar Evaluación 🏁' : 'Siguiente ➡️';
+            nextQuestionBtn.style.display = 'block';
             
-            nextQuestionBtn.style.display = 'inline-block';
-
             updateProgress();
         }
 
         function nextQuestion() {
             const question = currentQuestionSet[currentQuestionIndex];
-            let answer = userData.answers[question.id];
+            const answer = userData.answers[question.id];
             
             // Validar según el tipo de pregunta
             let isValid = true;
+            let errorMessage = '';
             
             if (question.type === 'binary' || question.type === 'options') {
                 isValid = answer !== undefined && answer !== '';
-            } else if (question.type === 'number') {
-                // CORRECCIÓN FINAL: Limpiamos y validamos el string numérico
-                const cleanedAnswer = String(answer || '').trim();
-                const num = parseFloat(cleanedAnswer);
-
-                // Validamos que NO esté vacío Y que sea un número válido Y no-negativo.
-                isValid = cleanedAnswer !== '' && !isNaN(num) && num >= 0;
+                errorMessage = 'Por favor, selecciona una respuesta.';
+            } 
+            else if (question.type === 'number') {
+                const numValue = parseFloat(answer);
+                isValid = !isNaN(numValue) && numValue >= 0;
+                errorMessage = 'Por favor, ingresa un número válido mayor o igual a 0.';
+            } 
+            else if (question.type === 'dimensions') {
+                const dims = answer || {};
+                const largo = parseFloat(dims.largo);
+                const ancho = parseFloat(dims.ancho);
                 
-            } else if (question.type === 'dimensions') {
-                
-                // Si answer es undefined o null, usamos un objeto vacío para evitar fallas
-                if (!answer) {
-                    answer = {largo: '', ancho: ''};
-                }
-
-                // CORRECCIÓN FINAL: Limpiamos los valores de largo y ancho.
-                const largoStr = String(answer.largo || '').trim();
-                const anchoStr = String(answer.ancho || '').trim();
-
-                const largoNum = parseFloat(largoStr);
-                const anchoNum = parseFloat(anchoStr);
-                
-                // Se valida que ambos campos NO estén vacíos, sean números válidos y no negativos.
-                isValid = largoStr !== '' && 
-                          anchoStr !== '' &&
-                          !isNaN(largoNum) && largoNum >= 0 &&
-                          !isNaN(anchoNum) && anchoNum >= 0;
+                isValid = !isNaN(largo) && largo > 0 && !isNaN(ancho) && ancho > 0;
+                errorMessage = 'Por favor, ingresa valores válidos para largo y ancho (mayores a 0).';
             }
             
             if (!isValid) {
-                alert('Por favor, responde la pregunta correctamente.');
+                alert(errorMessage);
                 return;
             }
-
+            
+            // Navegar a la siguiente pregunta o finalizar
             if (currentQuestionIndex < totalQuestions - 1) {
                 showQuestion(currentQuestionIndex + 1);
             } else {
-                // Si la validación es exitosa y es la última, se evalúa.
                 evaluateAnswers();
             }
         }
@@ -915,8 +917,9 @@
                     case '2': // Con Techo
                     case '3': // Sin Techo (Lógica de capacidad es la misma)
                         // Limpieza de datos antes de usar (por si acaso)
-                        const totalLargo = parseFloat(answers.storage_dimensions.largo || 0);
-                        const totalAncho = parseFloat(answers.storage_dimensions.ancho || 0);
+                        const dims = userData.answers.storage_dimensions || {};
+                        const totalLargo = parseFloat(dims.largo || 0);
+                        const totalAncho = parseFloat(dims.ancho || 0);
                         
                         const usableLargo = totalLargo - (WALL_CLEARANCE * 2);
                         const usableAncho = totalAncho - (WALL_CLEARANCE * 2);
