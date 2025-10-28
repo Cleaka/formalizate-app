@@ -991,7 +991,9 @@
             let contenido = `
                 <p><strong>Tipo de Almacén:</strong> ${userData.optionText}</p>
                 <p><strong>Resultado:</strong> ${userData.result}</p>
-                ${userData.result === 'Aprobado' ? `<p><strong>Capacidad Aprobada:</strong> ${userData.capacity.final_calcu} kg</SO_CALC_CAPACITYkg</p>` : ''}
+                
+                ${userData.result === 'Aprobado' ? `<p><strong>Capacidad Aprobada:</strong> ${userData.capacity.final_capacity} kg</p>` : ''}
+                
                 <strong>Respuestas Marcadas:</strong>
                 <ul>
             `;
