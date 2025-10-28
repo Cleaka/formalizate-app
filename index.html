@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Osinergmin - Asistente de Formalización</title>
+    <title>Osinergmin - Asistente de Formalización (GLP)</title>
     <style>
         :root {
             --primary: #005A9C; /* Azul Osinergmin */
@@ -32,7 +32,7 @@
             padding: 10px;
         }
         header {
-            background-color: var(--primary);
+            background: var(--primary);
             color: white;
             padding: 20px;
             text-align: center;
@@ -55,7 +55,6 @@
             margin-bottom: 20px;
         }
         
-        /* Ocultar pasos */
         .step { display: none; }
         .step.active { display: block; }
         
@@ -67,7 +66,7 @@
             text-align: center;
         }
 
-        /* ----- Estilos de Selección de Opciones (Paso 1) ----- */
+        /* --- Estilos de Selección de Opciones (Paso 1) --- */
         .option-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -91,8 +90,6 @@
         .option-card.selected {
             border-color: var(--secondary);
             background-color: rgba(0, 169, 224, 0.1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transform: translateY(0);
         }
         .option-icon {
             font-size: 48px;
@@ -106,9 +103,10 @@
         .option-card p {
             font-size: 0.9em;
             color: #777;
+            font-weight: bold;
         }
 
-        /* ----- Estilos del Asistente (Paso 2) ----- */
+        /* --- Estilos del Asistente (Paso 2) --- */
         #question-display {
             min-height: 200px;
             display: flex;
@@ -137,7 +135,6 @@
             grid-template-columns: 1fr;
             gap: 10px;
         }
-        /* Botones grandes para Sí/No/Opciones */
         .btn-option {
             display: block;
             width: 100%;
@@ -161,34 +158,30 @@
             background-color: rgba(0, 169, 224, 0.1);
             color: var(--primary);
         }
-        /* Botones para Sí y No en la misma fila */
         .answer-options.binary {
              grid-template-columns: 1fr 1fr;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
+        .dimensions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            align-items: center;
         }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
+        .dimensions-grid label {
+            font-weight: bold;
+            text-align: right;
+            font-size: 1.2em;
         }
         input[type="number"] {
             font-size: 1.2em;
             text-align: center;
             font-weight: bold;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
-        /* ----- Botones de Navegación ----- */
+        /* --- Botones de Navegación --- */
         .navigation-buttons {
             display: flex;
             justify-content: space-between;
@@ -206,27 +199,14 @@
             font-weight: 600;
             transition: background-color 0.3s;
         }
-        .btn:hover {
-            background-color: #007bbd;
-        }
-        .btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .btn-prev {
-            background-color: var(--dark);
-        }
-        .btn-prev:hover {
-            background-color: #4a637c;
-        }
-        .btn-eval {
-            background-color: var(--success);
-        }
-        .btn-eval:hover {
-            background-color: #219653;
-        }
+        .btn:hover { background-color: #007bbd; }
+        .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .btn-prev { background-color: var(--dark); }
+        .btn-prev:hover { background-color: #4a637c; }
+        .btn-eval { background-color: var(--success); }
+        .btn-eval:hover { background-color: #219653; }
 
-        /* ----- Resultados (Paso 3) ----- */
+        /* --- Resultados (Paso 3) --- */
         .result {
             padding: 20px;
             border-radius: 8px;
@@ -241,31 +221,51 @@
             border: 2px solid var(--success);
             color: #219653;
         }
-        .warning {
+        .danger {
             background-color: rgba(231, 76, 60, 0.1);
             border: 2px solid var(--danger);
             color: #c0392b;
         }
-        .recommendations {
+        .capacity-box {
+            background-color: #fff;
+            border: 2px solid var(--success);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        .capacity-box p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .capacity-box .final-capacity {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .failures-list {
             margin-top: 20px;
             text-align: left;
         }
-        .recommendation-item {
+        .failure-item {
             padding: 15px;
             margin-bottom: 10px;
+            border-left: 5px solid var(--danger);
+            background-color: rgba(231, 76, 60, 0.05);
+            color: #c0392b;
+            font-weight: bold;
+        }
+        .recommendation-item {
+             padding: 15px;
+            margin-top: 20px;
             border-left: 5px solid var(--warning);
             background-color: rgba(243, 156, 18, 0.1);
             color: #d35400;
             font-weight: 500;
-        }
-        .recommendation-item.critical {
-            border-left-color: var(--danger);
-            background-color: rgba(231, 76, 60, 0.1);
-            color: #c0392b;
-            font-weight: bold;
+            text-align: left;
         }
 
-        /* ----- Otros ----- */
+        /* --- Otros --- */
         .progress-bar {
             height: 10px;
             background-color: var(--light);
@@ -299,12 +299,12 @@
     <div class="container">
         <header>
             <div class="logo">🛡️ Osinergmin</div>
-            <div class="subtitle">Asistente de Pre-evaluación para Venta de Gas</div>
+            <div class="subtitle">Asistente de Pre-evaluación para Venta de GLP</div>
         </header>
 
         <div class="dni-section card">
-            <h2>¡Hola! 👋</h2>
-            <p style="text-align: center; margin-bottom: 20px;">Vamos a ayudarte a revisar si tu local cumple los requisitos de seguridad. Para guardar tu avance y usarlo en la oficina, ingresa tu DNI.</p>
+            <h2>¡Bienvenido! 👋</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Te ayudaremos a revisar si tu local cumple los requisitos de seguridad. Para guardar tu avance y usarlo en la oficina, ingresa tu DNI.</p>
             <div class="form-group">
                 <label for="dni">Ingresa tu DNI (8 dígitos):</label>
                 <input type="tel" id="dni" placeholder="Ej: 12345678" maxlength="8" pattern="[0-9]{8}">
@@ -320,25 +320,25 @@
             </div>
 
             <div class="step active" id="step1">
-                <h2>1. ¿Dónde guardarás los balones?</h2>
+                <h2>1. ¿Cómo almacenarás el gas?</h2>
                 <div class="option-grid">
                     <div class="option-card" data-option="1">
-                        <div class="option-icon">🏠</div>
-                        <h3>Espacio CON Techo</h3>
-                        <p>Almacén, cuarto, cochera techada, etc.</p>
+                        <div class="option-icon">🗄️</div>
+                        <h3>En Rack / Jaula</h3>
+                        <p>Hasta 120 kg</p>
                     </div>
                     <div class="option-card" data-option="2">
-                        <div class="option-icon">☀️</div>
-                        <h3>Espacio SIN Techo</h3>
-                        <p>Patio, jardín, área al aire libre.</p>
+                        <div class="option-icon">🏠</div>
+                        <h3>Local con Techo</h3>
+                        <p>Hasta 300 kg o 5,000 kg</p>
                     </div>
                     <div class="option-card" data-option="3">
-                        <div class="option-icon">🗄️</div>
-                        <h3>En Rack (Jaula)</h3>
-                        <p>En el frontis o retiro de la casa.</p>
+                        <div class="option-icon">☀️</div>
+                        <h3>Local sin Techo</h3>
+                        <p>Sin límite legal</p>
                     </div>
                 </div>
-                </div>
+            </div>
 
             <div class="step" id="step2">
                 <h2 id="question-title">2. Revisión de Seguridad</h2>
@@ -368,10 +368,28 @@
     </div>
 
     <script>
+        // --- CONSTANTES ---
+        // Factor de densidad (kg por metro cuadrado).
+        // Esto es una SIMULACIÓN para el concurso. La norma real es más compleja.
+        const DENSITY_FACTOR_KG_M2 = 250; 
+        const TRANSFORMER_MIN_DISTANCE = 7.6; // Distancia mínima en metros
+        const VENTILATION_MIN_AREA = 6; // Área mínima en m²
+
         // --- PREGUNTAS (El cerebro del asistente) ---
-        // Convertimos las preguntas de texto a opciones claras.
-        const questions = {
-            1: [ // Con Techo
+        // "critical: true" = Si falla, NO APRUEBA.
+        // "critical: false" = Es una recomendación, no un bloqueo.
+        const questionSets = {
+            // --- CASO 1: RACK (Hasta 120 kg) ---
+            1: [
+                {
+                    id: 'has_retiro',
+                    text: '¿Tu casa tiene un "retiro"? (Un espacio o jardín entre tu puerta y la vereda)',
+                    type: 'binary',
+                    options: ['Sí, tengo retiro', 'No, mi casa da a la vereda'],
+                    critical: true,
+                    condition: (answer) => answer === 'Sí, tengo retiro',
+                    failureMessage: 'Para usar un Rack (jaula), es obligatorio tener un espacio de retiro. No puede estar en la vereda.'
+                },
                 {
                     id: 'businesses',
                     text: '⚠️ ¡Atención! ¿Alguno de tus vecinos (costados, atrás, frente) tiene un taller de soldadura, mecánica, carpintería o un negocio que bote chispas?',
@@ -379,7 +397,54 @@
                     options: ['Sí, hay un taller cerca', 'No, son casas o bodegas'],
                     critical: true,
                     condition: (answer) => answer === 'No, son casas o bodegas',
-                    failureMessage: '¡Requisito Insubsistible! No puedes almacenar gas cerca de negocios que generen chispas (talleres, soldadura, etc.) por alto riesgo de explosión.'
+                    failureMessage: 'No puedes almacenar gas cerca de negocios que generen chispas (talleres, soldadura) por alto riesgo de explosión.'
+                },
+                {
+                    id: 'transformer_nearby',
+                    text: '¿Hay algún transformador eléctrico (ese gris en el poste) cerca?',
+                    type: 'binary',
+                    options: ['Sí, hay uno cerca', 'No hay ninguno cerca'],
+                    critical: false // La criticidad la tiene la distancia
+                },
+                {
+                    id: 'transformer_distance',
+                    text: `¿A cuántos metros está el transformador de tu RACK?`,
+                    type: 'number',
+                    helpText: `Mide en línea recta desde donde irá el rack hasta el transformador. La distancia mínima es ${TRANSFORMER_MIN_DISTANCE} metros.`,
+                    critical: true,
+                    dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' }, 
+                    condition: (answer) => parseFloat(answer) >= TRANSFORMER_MIN_DISTANCE,
+                    failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMER_MIN_DISTANCE} metros. El riesgo eléctrico es muy alto.`
+                },
+                {
+                    id: 'materials_floor',
+                    text: '¿De qué material es el PISO donde se apoyará el rack?',
+                    type: 'options',
+                    options: ['Cemento / Concreto', 'Tierra / Afirmado', 'Madera / Plástico / Grass'],
+                    critical: true,
+                    condition: (answer) => answer === 'Cemento / Concreto' || answer === 'Tierra / Afirmado',
+                    failureMessage: 'El PISO no puede ser de material inflamable (madera, plástico, grass).'
+                },
+                {
+                    id: 'materials_walls',
+                    text: '¿De qué material es la PARED de tu casa donde se apoyará el rack?',
+                    type: 'options',
+                    options: ['Ladrillo / Cemento (Noble)', 'Madera / Quincha', 'Estera / Plástico / Drywall'],
+                    critical: true,
+                    condition: (answer) => answer === 'Ladrillo / Cemento (Noble)',
+                    failureMessage: 'La PARED detrás del rack no puede ser de material inflamable (madera, estera, drywall).'
+                }
+            ],
+            // --- CASO 2: LOCAL CON TECHO (Hasta 300kg o 5,000kg) ---
+            2: [
+                {
+                    id: 'people_above',
+                    text: '¿Viven personas en el segundo piso (o más) de este mismo edificio?',
+                    type: 'binary',
+                    options: ['Sí, viven arriba', 'No, es solo local / depósito'],
+                    critical: true, // Es crítico para definir el límite de capacidad
+                    condition: () => true, // Siempre pasa, solo define la capacidad
+                    failureMessage: ''
                 },
                 {
                     id: 'ventilation_type',
@@ -392,59 +457,13 @@
                 },
                 {
                     id: 'ventilation_size',
-                    text: '¿Qué tamaño tiene esa ventilación (en metros cuadrados)?',
+                    text: `¿Qué tamaño tiene esa ventilación (en metros cuadrados)?`,
                     type: 'number',
-                    helpText: 'Mide el ANCHO y el ALTO de tu reja. Si mide 2m de ancho por 3m de alto, son 6 metros cuadrados.',
+                    helpText: `Mide el ANCHO y el ALTO de tu reja. Si mide 2m de ancho por 3m de alto, son 6 metros cuadrados. El mínimo es ${VENTILATION_MIN_AREA} m².`,
                     critical: true,
-                    condition: (answer) => parseFloat(answer) >= 6,
-                    failureMessage: 'La ventilación debe ser de al menos 6 metros cuadrados para asegurar que el gas escape si hay una fuga.'
+                    condition: (answer) => parseFloat(answer) >= VENTILATION_MIN_AREA,
+                    failureMessage: `La ventilación debe ser de al menos ${VENTILATION_MIN_AREA} metros cuadrados para asegurar que el gas escape si hay una fuga.`
                 },
-                {
-                    id: 'transformer_nearby',
-                    text: '¿Hay algún transformador eléctrico (esos grises en el poste) cerca de tu casa?',
-                    type: 'binary',
-                    options: ['Sí, hay uno cerca', 'No hay ninguno cerca'],
-                    critical: false // La criticidad la tiene la distancia
-                },
-                {
-                    id: 'transformer_distance',
-                    text: '¿A cuántos metros está el transformador de tu almacén?',
-                    type: 'number',
-                    helpText: 'Mide en línea recta desde el borde de tu almacén (donde irán los balones) hasta el transformador.',
-                    critical: true,
-                    dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' }, // Solo se muestra si la anterior fue "Sí"
-                    condition: (answer) => parseFloat(answer) >= 7.6,
-                    failureMessage: '¡Requisito Insubsistible! La distancia mínima al transformador debe ser 7.6 metros. El riesgo eléctrico es muy alto.'
-                },
-                {
-                    id: 'materials_roof',
-                    text: '¿De qué material es el TECHO de tu almacén?',
-                    type: 'options',
-                    options: ['Cemento / Ladrillo / Noble', 'Madera', 'Estera / Plástico / Calamina'],
-                    critical: true,
-                    condition: (answer) => answer === 'Cemento / Ladrillo / Noble',
-                    failureMessage: 'El TECHO no puede ser de material inflamable (madera, estera, plástico).'
-                },
-                {
-                    id: 'materials_floor',
-                    text: '¿De qué material es el PISO de tu almacén?',
-                    type: 'options',
-                    options: ['Cemento / Concreto', 'Tierra / Afirmado', 'Madera / Plástico'],
-                    critical: true,
-                    condition: (answer) => answer === 'Cemento / Concreto' || answer === 'Tierra / Afirmado',
-                    failureMessage: 'El PISO no puede ser de material inflamable (madera, plástico).'
-                },
-                {
-                    id: 'materials_walls',
-                    text: '¿De qué material son las PAREDES de tu almacén?',
-                    type: 'options',
-                    options: ['Cemento / Ladrillo / Noble', 'Madera', 'Estera / Plástico / Quincha'],
-                    critical: true,
-                    condition: (answer) => answer === 'Cemento / Ladrillo / Noble',
-                    failureMessage: 'Las PAREDES no pueden ser de material inflamable (madera, estera, quincha).'
-                }
-            ],
-            2: [ // Sin Techo
                 {
                     id: 'businesses',
                     text: '⚠️ ¡Atención! ¿Alguno de tus vecinos (costados, atrás, frente) tiene un taller de soldadura, mecánica, carpintería o un negocio que bote chispas?',
@@ -452,73 +471,140 @@
                     options: ['Sí, hay un taller cerca', 'No, son casas o bodegas'],
                     critical: true,
                     condition: (answer) => answer === 'No, son casas o bodegas',
-                    failureMessage: '¡Requisito Insubsistible! No puedes almacenar gas cerca de negocios que generen chispas (talleres, soldadura, etc.) por alto riesgo de explosión.'
+                    failureMessage: 'No puedes almacenar gas cerca de negocios que generen chispas (talleres, soldadura) por alto riesgo de explosión.'
                 },
                 {
                     id: 'transformer_nearby',
-                    text: '¿Hay algún transformador eléctrico (esos grises en el poste) cerca de tu casa?',
+                    text: '¿Hay algún transformador eléctrico (ese gris en el poste) cerca?',
+                    type: 'binary',
+                    options: ['Sí, hay uno cerca', 'No hay ninguno cerca'],
+                    critical: false 
+                },
+                {
+                    id: 'transformer_distance',
+                    text: `¿A cuántos metros está el transformador de tu ALMACÉN?`,
+                    type: 'number',
+                    helpText: `Mide en línea recta desde el borde de tu almacén hasta el transformador. El mínimo es ${TRANSFORMER_MIN_DISTANCE} metros.`,
+                    critical: true,
+                    dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' }, 
+                    condition: (answer) => parseFloat(answer) >= TRANSFORMER_MIN_DISTANCE,
+                    failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMER_MIN_DISTANCE} metros.`
+                },
+                {
+                    id: 'materials_roof',
+                    text: '¿De qué material es el TECHO de tu almacén?',
+                    type: 'options',
+                    options: ['Ladrillo / Cemento (Noble)', 'Madera / Quincha', 'Estera / Plástico / Calamina'],
+                    critical: true,
+                    condition: (answer) => answer === 'Ladrillo / Cemento (Noble)',
+                    failureMessage: 'El TECHO no puede ser de material inflamable (madera, estera, plástico, calamina sobre madera).'
+                },
+                {
+                    id: 'materials_floor',
+                    text: '¿De qué material es el PISO de tu almacén?',
+                    type: 'options',
+                    options: ['Cemento / Concreto / Loseta', 'Tierra / Afirmado', 'Madera / Plástico / Vinílico'],
+                    critical: true,
+                    condition: (answer) => answer === 'Cemento / Concreto / Loseta' || answer === 'Tierra / Afirmado',
+                    failureMessage: 'El PISO no puede ser de material inflamable (madera, plástico, vinílico).'
+                },
+                {
+                    id: 'materials_walls',
+                    text: '¿De qué material son las PAREDES de tu almacén?',
+                    type: 'options',
+                    options: ['Ladrillo / Cemento (Noble)', 'Madera / Quincha', 'Estera / Plástico / Drywall'],
+                    critical: true,
+                    condition: (answer) => answer === 'Ladrillo / Cemento (Noble)',
+                    failureMessage: 'Las PAREDES no pueden ser de material inflamable (madera, estera, drywall).'
+                },
+                {
+                    id: 'has_electricity_recommendation',
+                    text: '¿Hay cables eléctricos, enchufes o tomacorrientes DENTRO del almacén?',
+                    type: 'binary',
+                    options: ['Sí, hay cables/enchufes', 'No, no hay nada eléctrico'],
+                    critical: false, // Esto es una RECOMENDACIÓN
+                    recommendationMessage: 'RECOMENDACIÓN: Debes retirar todas las conexiones eléctricas (cables, enchufes, focos) del interior del almacén.'
+                },
+                {
+                    id: 'storage_dimensions',
+                    text: 'Finalmente, dinos las medidas de tu almacén (en metros):',
+                    type: 'dimensions',
+                    critical: true, // Crítico para el cálculo
+                    condition: (answer) => parseFloat(answer.largo) > 0 && parseFloat(answer.ancho) > 0,
+                    failureMessage: 'Debes ingresar medidas válidas para calcular tu capacidad.'
+                }
+            ],
+            // --- CASO 3: LOCAL SIN TECHO (Sin límite) ---
+            3: [
+                {
+                    id: 'businesses',
+                    text: '⚠️ ¡Atención! ¿Alguno de tus vecinos (costados, atrás, frente) tiene un taller de soldadura, mecánica, carpintería o un negocio que bote chispas?',
+                    type: 'binary',
+                    options: ['Sí, hay un taller cerca', 'No, son casas o bodegas'],
+                    critical: true,
+                    condition: (answer) => answer === 'No, son casas o bodegas',
+                    failureMessage: 'No puedes almacenar gas cerca de negocios que generen chispas (talleres, soldadura) por alto riesgo de explosión.'
+                },
+                {
+                    id: 'transformer_nearby',
+                    text: '¿Hay algún transformador eléctrico (ese gris en el poste) cerca?',
                     type: 'binary',
                     options: ['Sí, hay uno cerca', 'No hay ninguno cerca'],
                     critical: false
                 },
                 {
                     id: 'transformer_distance',
-                    text: '¿A cuántos metros está el transformador de tu almacén?',
+                    text: `¿A cuántos metros está el transformador de tu ÁREA de almacén?`,
                     type: 'number',
-                    helpText: 'Mide en línea recta desde el borde de tu almacén (donde irán los balones) hasta el transformador.',
+                    helpText: `Mide en línea recta desde el borde de tu almacén hasta el transformador. El mínimo es ${TRANSFORMER_MIN_DISTANCE} metros.`,
                     critical: true,
-                    dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' },
-                    condition: (answer) => parseFloat(answer) >= 7.6,
-                    failureMessage: '¡Requisito Insubsistible! La distancia mínima al transformador debe ser 7.6 metros. El riesgo eléctrico es muy alto.'
+                    dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' }, 
+                    condition: (answer) => parseFloat(answer) >= TRANSFORMER_MIN_DISTANCE,
+                    failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMER_MIN_DISTANCE} metros.`
                 },
                 {
-                    id: 'has_door',
-                    text: '¿Ese espacio (patio) tiene una puerta que lo encierre?',
+                    id: 'materials_roof', // Re-interpretado para "toldo"
+                    text: '¿Usarás algún toldo o techo temporal sobre el área?',
                     type: 'binary',
-                    options: ['Sí, tiene puerta', 'No, es abierto'],
+                    options: ['Sí, pondré un toldo/techo', 'No, estará a cielo abierto'],
                     critical: true,
-                    condition: (answer) => answer === 'No, es abierto',
-                    failureMessage: 'El espacio sin techo debe ser abierto, no un cuarto cerrado sin techo, para que el aire circule.'
+                    condition: (answer) => answer === 'No, estará a cielo abierto',
+                    failureMessage: 'En un local "Sin Techo", el área de balones debe estar a cielo abierto, sin toldos o coberturas inflamables.'
                 },
-                {
-                    id: 'has_electricity',
-                    text: '¿Pasan cables eléctricos (de luz, tomacorrientes) por ese espacio?',
-                    type: 'binary',
-                    options: ['Sí, hay cables', 'No hay cables eléctricos'],
-                    critical: true,
-                    condition: (answer) => answer === 'No hay cables eléctricos',
-                    failureMessage: 'No debe haber ningún tipo de instalación eléctrica (cables, enchufes) en el área de almacenamiento.'
-                },
-                {
+                 {
                     id: 'materials_floor',
-                    text: '¿De qué material es el PISO de ese espacio?',
+                    text: '¿De qué material es el PISO de tu almacén?',
                     type: 'options',
-                    options: ['Cemento / Concreto', 'Tierra / Afirmado', 'Madera / Plástico / Grass sintético'],
+                    options: ['Cemento / Concreto / Loseta', 'Tierra / Afirmado', 'Madera / Plástico / Grass'],
                     critical: true,
-                    condition: (answer) => answer === 'Cemento / Concreto' || answer === 'Tierra / Afirmado',
+                    condition: (answer) => answer === 'Cemento / Concreto / Loseta' || answer === 'Tierra / Afirmado',
                     failureMessage: 'El PISO no puede ser de material inflamable (madera, plástico, grass).'
                 },
                 {
                     id: 'materials_walls',
-                    text: '¿De qué material son las PAREDES que rodean ese espacio?',
+                    text: '¿De qué material son las PAREDES que rodean el almacén?',
                     type: 'options',
-                    options: ['Cemento / Ladrillo / Noble', 'Madera', 'Estera / Plástico / Quincha'],
+                    options: ['Ladrillo / Cemento (Noble)', 'Madera / Quincha', 'Estera / Plástico / Drywall'],
                     critical: true,
-                    condition: (answer) => answer === 'Cemento / Ladrillo / Noble',
-                    failureMessage: 'Las PAREDES que rodean el patio no pueden ser de material inflamable.'
-                }
-            ],
-            3: [ // En Rack
+                    condition: (answer) => answer === 'Ladrillo / Cemento (Noble)',
+                    failureMessage: 'Las PAREDES que rodean el local no pueden ser de material inflamable (madera, estera, drywall).'
+                },
                 {
-                    id: 'has_retiro',
-                    text: '¿Tu casa tiene un "retiro"? (Un espacio o jardín entre tu puerta y la vereda/pista)',
+                    id: 'has_electricity_recommendation',
+                    text: '¿Pasan cables eléctricos o hay enchufes en esa área?',
                     type: 'binary',
-                    options: ['Sí, tengo retiro/jardín', 'No, mi casa da a la vereda'],
+                    options: ['Sí, hay cables/enchufes', 'No, no hay nada eléctrico'],
+                    critical: false, // RECOMENDACIÓN
+                    recommendationMessage: 'RECOMENDACIÓN: Debes retirar todas las conexiones eléctricas (cables, enchufes) del área de almacenamiento.'
+                },
+                {
+                    id: 'storage_dimensions',
+                    text: 'Finalmente, dinos las medidas de tu área de almacén (en metros):',
+                    type: 'dimensions',
                     critical: true,
-                    condition: (answer) => answer === 'Sí, tengo retiro/jardín',
-                    failureMessage: '¡Requisito Insubsistible! Para usar un rack (jaula), es obligatorio tener un espacio de retiro. No puede estar en la vereda.'
+                    condition: (answer) => parseFloat(answer.largo) > 0 && parseFloat(answer.ancho) > 0,
+                    failureMessage: 'Debes ingresar medidas válidas para calcular tu capacidad.'
                 }
-                // Aquí se podrían agregar más preguntas específicas para el rack si las tuvieras.
             ]
         };
 
@@ -526,12 +612,14 @@
         let currentStep = 1;
         let currentQuestionIndex = 0;
         let selectedOption = null;
+        let currentQuestionSet = [];
         let userData = {
             dni: '',
             option: '',
             optionText: '',
             answers: {},
             result: '',
+            failures: [],
             recommendations: []
         };
         let totalQuestions = 0;
@@ -543,20 +631,12 @@
         const saveDniBtn = document.getElementById('saveDni');
         const dniMessage = document.getElementById('dniMessage');
         const wizardContainer = document.getElementById('wizard-container');
-        
-        // Step 1
         const optionCards = document.querySelectorAll('.option-card');
-        
-        // Step 2
         const questionDisplay = document.getElementById('question-display');
         const nextQuestionBtn = document.getElementById('nextQuestion');
         const prevQuestionBtn = document.getElementById('prevQuestion');
-        
-        // Step 3
         const resultContainer = document.getElementById('result-container');
         const restartBtn = document.getElementById('restart');
-        
-        // Declaración
         const declaration = document.getElementById('declaration');
         const declDni = document.getElementById('decl-dni');
         const declarationContent = document.getElementById('declaration-content');
@@ -565,26 +645,22 @@
         // --- EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', function () {
             saveDniBtn.addEventListener('click', saveDni);
-            dniInput.addEventListener('keyup', (e) => {
-                if(e.key === 'Enter') saveDni();
-            });
+            dniInput.addEventListener('keyup', (e) => { if(e.key === 'Enter') saveDni(); });
 
             optionCards.forEach(card => {
                 card.addEventListener('click', function () {
                     selectOption(this);
-                    // Ir al siguiente paso automáticamente al seleccionar
                     setTimeout(goToStep2, 300); 
                 });
             });
 
             nextQuestionBtn.addEventListener('click', nextQuestion);
             prevQuestionBtn.addEventListener('click', prevQuestion);
-            
             restartBtn.addEventListener('click', restartEvaluation);
             printDeclarationBtn.addEventListener('click', printDeclaration);
         });
 
-        // --- FUNCIONES ---
+        // --- FUNCIONES PRINCIPALES ---
 
         function saveDni() {
             const dni = dniInput.value.trim();
@@ -595,7 +671,7 @@
                 dniInput.disabled = true;
                 saveDniBtn.disabled = true;
                 wizardContainer.style.display = 'block';
-                updateProgress(); // Iniciar barra de progreso
+                updateProgress();
             } else {
                 dniMessage.textContent = 'Ingresa un DNI válido (8 números).';
                 dniMessage.style.color = 'red';
@@ -606,11 +682,11 @@
             optionCards.forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             selectedOption = card.getAttribute('data-option');
+            currentQuestionSet = questionSets[selectedOption];
+            totalQuestions = currentQuestionSet.length;
+            
             userData.option = selectedOption;
             userData.optionText = card.querySelector('h3').textContent;
-            
-            // Contar total de preguntas (considerando condicionales)
-            totalQuestions = questions[selectedOption].length; 
         }
 
         function goToStep(stepNumber) {
@@ -623,7 +699,7 @@
         function goToStep2() {
             if (!selectedOption) return;
             currentQuestionIndex = 0;
-            userData.answers = {}; // Limpiar respuestas si vuelve
+            userData.answers = {}; 
             showQuestion(currentQuestionIndex);
             goToStep(2);
         }
@@ -631,9 +707,8 @@
         function updateProgress() {
             let progressPercent = 0;
             if (currentStep === 1) {
-                progressPercent = 5; // Un pequeño avance al inicio
+                progressPercent = 5;
             } else if (currentStep === 2) {
-                // Progreso basado en preguntas
                 progressPercent = 10 + (currentQuestionIndex / totalQuestions) * 80;
             } else if (currentStep === 3) {
                 progressPercent = 100;
@@ -644,53 +719,49 @@
         // --- LÓGICA DEL ASISTENTE (PASO 2) ---
 
         function showQuestion(index) {
-            // Limpiar pregunta anterior
             questionDisplay.innerHTML = '';
             
-            const question = questions[selectedOption][index];
+            if (index < 0 || index >= totalQuestions) {
+                 // Si se sale de rango (raro), ir al inicio o final
+                 if (index < 0) goToStep(1);
+                 else evaluateAnswers();
+                 return;
+            }
+
+            const question = currentQuestionSet[index];
 
             // --- Lógica de Preguntas Condicionales ---
             if (question.dependsOn) {
                 const dependency = question.dependsOn;
                 const dependencyAnswer = userData.answers[dependency.id];
                 
-                // Si la respuesta de la dependencia NO es la requerida, saltar esta pregunta
                 if (dependencyAnswer !== dependency.value) {
-                    // Guardar una respuesta "N/A" para esta pregunta saltada
                     userData.answers[question.id] = 'N/A (Saltada)';
-                    // Decidir si ir adelante o atrás
-                    const direction = index > currentQuestionIndex ? 1 : -1;
+                    const direction = index > currentQuestionIndex ? 1 : -1; // Detectar si vamos adelante o atrás
                     const nextIndex = index + direction;
-
-                    if (nextIndex >= 0 && nextIndex < totalQuestions) {
-                        showQuestion(nextIndex); // Saltar a la siguiente/anterior
-                    } else if (nextIndex >= totalQuestions) {
-                        evaluateAnswers(); // Si era la última, evaluar
-                    } else {
-                        goToStep(1); // Si era la primera, ir al paso 1
-                    }
-                    return; // Detener ejecución
+                    
+                    // Actualizar índice global ANTES de la llamada recursiva
+                    currentQuestionIndex = index; 
+                    
+                    showQuestion(nextIndex); // Saltar a la siguiente/anterior
+                    return; 
                 }
             }
 
-            // Actualizar índice global
             currentQuestionIndex = index;
             
-            // Crear el texto de la pregunta
             const qText = document.createElement('div');
             qText.className = 'question-text';
             qText.textContent = question.text;
             questionDisplay.appendChild(qText);
             
-            // Añadir texto de ayuda si existe
             if (question.helpText) {
                 const qHelp = document.createElement('div');
                 qHelp.className = 'help-text';
-                qHelp.textContent = `💡 ¿Cómo mido esto? ${question.helpText}`;
+                qHelp.textContent = `💡 ${question.helpText}`;
                 questionDisplay.appendChild(qHelp);
             }
 
-            // Crear las opciones de respuesta
             const qOptions = document.createElement('div');
             qOptions.className = 'answer-options';
             
@@ -698,25 +769,8 @@
 
             switch (question.type) {
                 case 'binary':
-                    qOptions.classList.add('binary');
-                    question.options.forEach(opt => {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn-option';
-                        btn.textContent = opt;
-                        if(opt === savedAnswer) btn.classList.add('selected');
-                        btn.onclick = () => {
-                            // Guardar respuesta y avanzar automáticamente
-                            userData.answers[question.id] = opt;
-                            // Resaltar selección
-                            qOptions.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
-                            btn.classList.add('selected');
-                            // Avanzar
-                            setTimeout(nextQuestion, 200);
-                        };
-                        qOptions.appendChild(btn);
-                    });
-                    break;
                 case 'options':
+                    qOptions.classList.add(question.type === 'binary' ? 'binary' : 'full-width');
                     question.options.forEach(opt => {
                         const btn = document.createElement('button');
                         btn.className = 'btn-option';
@@ -732,39 +786,52 @@
                     });
                     break;
                 case 'number':
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.placeholder = '0.0';
-                    input.value = (savedAnswer && savedAnswer !== 'N/A') ? savedAnswer : '';
-                    input.onchange = () => {
-                        userData.answers[question.id] = input.value;
+                    const inputNum = document.createElement('input');
+                    inputNum.type = 'number';
+                    inputNum.placeholder = '0.0';
+                    inputNum.value = (savedAnswer && savedAnswer !== 'N/A') ? savedAnswer : '';
+                    inputNum.onchange = () => {
+                        userData.answers[question.id] = inputNum.value;
                     };
-                    qOptions.appendChild(input);
-                    // Para números, no avanzamos auto, el usuario usa el botón "Siguiente"
+                    qOptions.appendChild(inputNum);
+                    break;
+                case 'dimensions':
+                    qOptions.className = 'dimensions-grid';
+                    const savedLargo = (savedAnswer && savedAnswer.largo) ? savedAnswer.largo : '';
+                    const savedAncho = (savedAnswer && savedAnswer.ancho) ? savedAnswer.ancho : '';
+
+                    qOptions.innerHTML = `
+                        <label for="dim-largo">Largo (m):</label>
+                        <input type="number" id="dim-largo" placeholder="Ej: 5.5" value="${savedLargo}">
+                        <label for="dim-ancho">Ancho (m):</label>
+                        <input type="number" id="dim-ancho" placeholder="Ej: 4.0" value="${savedAncho}">
+                    `;
+                    qOptions.onchange = () => {
+                        userData.answers[question.id] = {
+                            largo: document.getElementById('dim-largo').value,
+                            ancho: document.getElementById('dim-ancho').value
+                        };
+                    };
                     break;
             }
             
             questionDisplay.appendChild(qOptions);
             
-            // Actualizar botones de navegación
             prevQuestionBtn.disabled = (index === 0);
             nextQuestionBtn.textContent = (index === totalQuestions - 1) ? 'Finalizar Evaluación 🏁' : 'Siguiente ➡️';
             
             // Ocultar "Siguiente" si es de botones (avanza solo)
-            if(question.type === 'binary' || question.type === 'options') {
-                nextQuestionBtn.style.display = 'none';
-            } else {
-                nextQuestionBtn.style.display = 'inline-block';
-            }
+            nextQuestionBtn.style.display = (question.type === 'binary' || question.type === 'options') ? 'none' : 'inline-block';
 
             updateProgress();
         }
 
         function nextQuestion() {
-            const question = questions[selectedOption][currentQuestionIndex];
+            const question = currentQuestionSet[currentQuestionIndex];
             
-            // Validar respuesta actual antes de avanzar
-            if (!userData.answers[question.id]) {
+            // Validar respuesta actual
+            const answer = userData.answers[question.id];
+            if (!answer || (question.type === 'dimensions' && (!answer.largo || !answer.ancho))) {
                 alert('Por favor, responde la pregunta.');
                 return;
             }
@@ -772,7 +839,6 @@
             if (currentQuestionIndex < totalQuestions - 1) {
                 showQuestion(currentQuestionIndex + 1);
             } else {
-                // Última pregunta
                 evaluateAnswers();
             }
         }
@@ -786,65 +852,151 @@
         // --- LÓGICA DE EVALUACIÓN (PASO 3) ---
 
         function evaluateAnswers() {
-            const optionQuestions = questions[selectedOption];
+            userData.failures = [];
             userData.recommendations = [];
             let allCriticalPassed = true;
+            
+            let legal_limit = 0;
+            let calculated_capacity = 0;
+            let final_capacity = 0;
+            let area = 0;
 
-            optionQuestions.forEach(question => {
+            // --- 1. Revisar todas las preguntas ---
+            currentQuestionSet.forEach(question => {
                 const answer = userData.answers[question.id];
                 
-                // Si la pregunta fue saltada (N/A), no la evaluamos
                 if (answer === 'N/A (Saltada)') return; 
                 
                 if (question.critical && !question.condition(answer)) {
                     allCriticalPassed = false;
-                    userData.recommendations.push({
-                        message: question.failureMessage,
-                        critical: question.failureMessage.includes('Insubsistible') // Marcar si es insubsistible
-                    });
+                    userData.failures.push(question.failureMessage);
+                }
+                
+                if (!question.critical && question.recommendationMessage && question.condition(answer) === false) {
+                     userData.recommendations.push(question.recommendationMessage);
                 }
             });
 
-            userData.result = allCriticalPassed ? 'Aprobado' : 'Requiere Mejoras';
-            showResults(allCriticalPassed);
+            // --- 2. Si pasó, calcular capacidad ---
+            if(allCriticalPassed) {
+                userData.result = 'Aprobado';
+                const answers = userData.answers;
+
+                switch (selectedOption) {
+                    case '1': // Rack
+                        legal_limit = 120;
+                        calculated_capacity = 120;
+                        final_capacity = 120;
+                        break;
+                    
+                    case '2': // Con Techo
+                        const peopleAbove = answers.people_above === 'Sí, viven arriba';
+                        legal_limit = peopleAbove ? 300 : 5000;
+                        
+                        area = parseFloat(answers.storage_dimensions.largo) * parseFloat(answers.storage_dimensions.ancho);
+                        calculated_capacity = area * DENSITY_FACTOR_KG_M2;
+                        
+                        // La capacidad final es EL MENOR entre el límite legal y lo que cabe en el espacio.
+                        final_capacity = Math.min(legal_limit, calculated_capacity);
+                        break;
+
+                    case '3': // Sin Techo
+                        legal_limit = Infinity; // Sin límite legal
+                        
+                        area = parseFloat(answers.storage_dimensions.largo) * parseFloat(answers.storage_dimensions.ancho);
+                        calculated_capacity = area * DENSITY_FACTOR_KG_M2;
+                        
+                        final_capacity = calculated_capacity;
+                        break;
+                }
+                
+                // Guardar datos de capacidad
+                userData.capacity = {
+                    legal_limit: legal_limit,
+                    area: area,
+                    calculated_capacity: calculated_capacity,
+                    final_capacity: final_capacity.toFixed(0) // Redondear
+                };
+
+            } else {
+                userData.result = 'No Aprobado';
+                userData.capacity = null;
+            }
+
+            showResults();
             goToStep(3);
         }
 
-        function showResults(allCriticalPassed) {
+        function showResults() {
             resultContainer.innerHTML = '';
-            if (allCriticalPassed) {
+            let recommendationsHTML = '';
+            
+            // Mostrar recomendaciones (siempre, si existen)
+            if(userData.recommendations.length > 0) {
+                userData.recommendations.forEach(rec => {
+                    recommendationsHTML += `<div class="recommendation-item">${rec}</div>`;
+                });
+            }
+
+            if (userData.result === 'Aprobado') {
+                const cap = userData.capacity;
+                let capacityHTML = '';
+
+                if (selectedOption === '1') { // Rack
+                     capacityHTML = `
+                        <p>Tu modalidad es RACK. El límite es fijo.</p>
+                        <p class="final-capacity">Capacidad Máxima: ${cap.final_capacity} kg</p>
+                     `;
+                } else if (selectedOption === '2') { // Con Techo
+                    capacityHTML = `
+                        <p>Tu espacio mide: <strong>${cap.area.toFixed(2)} m²</strong></p>
+                        <p>Tu límite legal (por tener ${userData.answers.people_above === 'Sí, viven arriba' ? 'vivienda arriba' : 'uso exclusivo'}) es: <strong>${cap.legal_limit} kg</strong></p>
+                        <p>Tu capacidad por espacio (a ${DENSITY_FACTOR_KG_M2} kg/m²) es: <strong>${cap.calculated_capacity.toFixed(0)} kg</strong></p>
+                        <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity} kg</p>
+                        <small>(Se aprueba el valor más bajo entre el límite legal y el de tu espacio)</small>
+                    `;
+                } else { // Sin Techo
+                    capacityHTML = `
+                        <p>Tu espacio mide: <strong>${cap.area.toFixed(2)} m²</strong></p>
+                        <p>Tu modalidad (Sin Techo) no tiene límite legal.</p>
+                        <p class="final-capacity">Capacidad Máxima (según tu espacio): ${cap.final_capacity} kg</p>
+                    `;
+                }
+
                 resultContainer.innerHTML = `
                     <div class="result success">
                         <div class="result-icon">🎉</div>
-                        <h3>¡Felicitaciones!</h3>
-                        <p>Has pasado la pre-evaluación de seguridad.</p>
-                        <p style="margin-top: 15px; font-weight: bold;">Tu espacio cumple con los requisitos más importantes. El siguiente paso es ir a la oficina.</p>
-                        <p style="margin-top: 15px;">Acércate a Osinergmin con tu DNI. Tus respuestas ya están guardadas para generar tu Declaración Jurada.</p>
+                        <h3>¡Felicidades! Local APROBADO</h3>
+                        <p>Has pasado la pre-evaluación de seguridad. Tu espacio cumple con los requisitos críticos.</p>
+                        
+                        <div class="capacity-box">
+                            ${capacityHTML}
+                        </div>
+                        
+                        <p style="margin-top: 15px; font-weight: bold;">Acércate a la oficina de Osinergmin con tu DNI. Tus respuestas están guardadas para generar tu Declaración Jurada.</p>
                     </div>
+                     ${recommendationsHTML}
                 `;
-            } else {
-                let recommendationsHTML = '<div class="recommendations"><h4>Debes corregir lo siguiente:</h4>';
-                let hasCritical = false;
+            } else { // No Aprobado
                 
-                userData.recommendations.forEach(rec => {
-                    if (rec.critical) hasCritical = true;
-                    recommendationsHTML += `<div class="recommendation-item ${rec.critical ? 'critical' : ''}">${rec.message}</div>`;
+                let failuresHTML = '<div class="failures-list"><h4>Debes corregir los siguientes puntos críticos:</h4>';
+                userData.failures.forEach(fail => {
+                    failuresHTML += `<div class="failure-item">❌ ${fail}</div>`;
                 });
-                recommendationsHTML += '</div>';
+                failuresHTML += '</div>';
 
                 resultContainer.innerHTML = `
-                    <div class="result warning">
-                        <div class="result-icon">⚠️</div>
-                        <h3>¡Atención! Hay puntos por mejorar</h3>
-                        <p>Tu espacio aún no cumple con todos los requisitos de seguridad.</p>
-                        ${hasCritical ? '<p style="margin-top:15px; font-weight:bold;">Detectamos un REQUISITO INSUBSISTIBLE. Esto significa que en este local NO es posible la formalización.</p>' : ''}
-                        ${recommendationsHTML}
+                    <div class="result danger">
+                        <div class="result-icon">🚫</div>
+                        <h3>Local NO APROBADO</h3>
+                        <p>Tu espacio no cumple con uno o más requisitos críticos de seguridad.</p>
+                        ${failuresHTML}
                         <p style="margin-top:20px;">Por favor, realiza las mejoras y vuelve a intentarlo. ¡Estamos para ayudarte!</p>
                     </div>
+                    ${recommendationsHTML}
                 `;
             }
 
-            // Guardar en LocalStorage y mostrar DJ
             if (userData.dni) {
                 localStorage.setItem(`evaluacion_${userData.dni}`, JSON.stringify(userData));
             }
@@ -857,19 +1009,37 @@
             let contenido = `
                 <p><strong>Tipo de Almacén:</strong> ${userData.optionText}</p>
                 <p><strong>Resultado:</strong> ${userData.result}</p>
+                ${userData.result === 'Aprobado' ? `<p><strong>Capacidad Aprobada:</strong> ${userData.capacity.final_capacity} kg</p>` : ''}
                 <strong>Respuestas Marcadas:</strong>
                 <ul>
             `;
             
-            questions[selectedOption].forEach(q => {
-                const answer = userData.answers[q.id] || 'No respondida';
-                // No mostrar preguntas saltadas en la DJ
+            currentQuestionSet.forEach(q => {
+                const answer = userData.answers[q.id];
+                let answerText = answer;
+
+                if(typeof answer === 'object' && answer !== null) {
+                    answerText = `Largo: ${answer.largo}m, Ancho: ${answer.ancho}m`;
+                }
+                
                 if(answer !== 'N/A (Saltada)') {
-                     contenido += `<li><strong>${q.text}:</strong> ${answer}</li>`;
+                     contenido += `<li><strong>${q.text}:</strong> ${answerText}</li>`;
                 }
             });
             
             contenido += `</ul>`;
+            
+            if (userData.failures.length > 0) {
+                 contenido += `<p><strong>Puntos Críticos Fallidos:</strong></p><ul>`;
+                 userData.failures.forEach(f => { contenido += `<li>${f}</li>`; });
+                 contenido += `</ul>`;
+            }
+            if (userData.recommendations.length > 0) {
+                 contenido += `<p><strong>Recomendaciones (No Críticas):</strong></p><ul>`;
+                 userData.recommendations.forEach(r => { contenido += `<li>${r}</li>`; });
+                 contenido += `</ul>`;
+            }
+
             declarationContent.innerHTML = contenido;
         }
 
@@ -881,10 +1051,12 @@
             currentStep = 1;
             currentQuestionIndex = 0;
             selectedOption = null;
+            currentQuestionSet = [];
             userData.option = '';
             userData.optionText = '';
             userData.answers = {};
             userData.result = '';
+            userData.failures = [];
             userData.recommendations = [];
             
             optionCards.forEach(card => card.classList.remove('selected'));
@@ -892,9 +1064,8 @@
             questionDisplay.innerHTML = '';
             
             goToStep(1);
-            updateProgress(); // Resetea la barra
+            updateProgress();
         }
     </script>
 </body>
 </html>
-
