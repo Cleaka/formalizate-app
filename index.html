@@ -973,37 +973,37 @@
                 let capacityHTML = '';
 
                 // En la parte de capacityHTML dentro de showResults(), reemplazar con:
-if (selectedOption === '1') { // Rack - CAPACIDAD FIJA
-     capacityHTML = `
-        <p>Tu modalidad es RACK/JAULA. El límite es fijo.</p>
-        <p class="final-capacity">Capacidad Máxima: ${cap.final_capacity} kg</p>
-        <p><em>Para racks/jaulas la capacidad máxima permitida es de 120 kg</em></p>
-     `;
-} else if (selectedOption === '2') { // Local con Techo
-     const dims = userData.answers.storage_dimensions;
-     capacityHTML = `
-        <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
-        <p>Área útil para balones (restando 4.6m por lado): <strong>${cap.area.toFixed(2)} m²</strong></p>
-        <p>Número máximo de balones de 10kg en 2 niveles: <strong>${cap.balones_count} balones</strong></p>
-        <p>Tu límite legal para Local con Techo es: <strong>${cap.legal_limit.toLocaleString()} kg</strong></p>
-        <p>Tu capacidad por espacio útil es: <strong>${cap.calculated_capacity.toLocaleString()} kg</strong></p>
-        <hr style="margin: 10px 0;">
-        <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity.toLocaleString()} kg</p>
-        <small>(Se aprueba el valor más bajo entre el límite legal y el de tu espacio)</small>
-    `;
-} else { // Local sin Techo
-     const dims = userData.answers.storage_dimensions;
-     capacityHTML = `
-        <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
-        <p>Área útil para balones (restando 4.6m por lado): <strong>${cap.area.toFixed(2)} m²</strong></p>
-        <p>Número máximo de balones de 10kg en 2 niveles: <strong>${cap.balones_count} balones</strong></p>
-        <p>Tu límite legal para Local sin Techo es: <strong>${cap.legal_limit.toLocaleString()} kg</strong></p>
-        <p>Tu capacidad por espacio útil es: <strong>${cap.calculated_capacity.toLocaleString()} kg</strong></p>
-        <hr style="margin: 10px 0;">
-        <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity.toLocaleString()} kg</p>
-        <small>(Se aprueba el valor más bajo entre el límite legal y el de tu espacio)</small>
-    `;
-}
+                if (selectedOption === '1') { // Rack - CAPACIDAD FIJA
+                    capacityHTML = `
+                        <p>Tu modalidad es RACK/JAULA. El límite es fijo.</p>
+                        <p class="final-capacity">Capacidad Máxima: ${cap.final_capacity} kg</p>
+                        <p><em>Para racks/jaulas la capacidad máxima permitida es de 120 kg</em></p>
+                     `;
+                } else if (selectedOption === '2') { // Local con Techo
+                     const dims = userData.answers.storage_dimensions;
+                     capacityHTML = `
+                        <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
+                        <p>Área útil para balones (restando 4.6m por lado): <strong>${cap.area.toFixed(2)} m²</strong></p>
+                        <p>Número máximo de balones de 10kg en 2 niveles: <strong>${cap.balones_count} balones</strong></p>
+                        <p>Tu límite legal para Local con Techo es: <strong>${cap.legal_limit.toLocaleString()} kg</strong></p>
+                        <p>Tu capacidad por espacio útil es: <strong>${cap.calculated_capacity.toLocaleString()} kg</strong></p>
+                        <hr style="margin: 10px 0;">
+                        <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity.toLocaleString()} kg</p>
+                        <small>(Se aprueba el valor más bajo entre el límite legal y el de tu espacio)</small>
+                    `;
+                } else { // Local sin Techo
+                     const dims = userData.answers.storage_dimensions;
+                     capacityHTML = `
+                        <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
+                        <p>Área útil para balones (restando 4.6m por lado): <strong>${cap.area.toFixed(2)} m²</strong></p>
+                        <p>Número máximo de balones de 10kg en 2 niveles: <strong>${cap.balones_count} balones</strong></p>
+                        <p>Tu límite legal para Local sin Techo es: <strong>${cap.legal_limit.toLocaleString()} kg</strong></p>
+                        <p>Tu capacidad por espacio útil es: <strong>${cap.calculated_capacity.toLocaleString()} kg</strong></p>
+                        <hr style="margin: 10px 0;">
+                        <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity.toLocaleString()} kg</p>
+                        <small>(Se aprueba el valor más bajo entre el límite legal y el de tu espacio)</small>
+                    `;
+                }
                 resultContainer.innerHTML = `
                     <div class="result success">
                         <div class="result-icon">🎉</div>
