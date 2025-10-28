@@ -282,6 +282,21 @@
             border-radius: 8px;
             background-color: #f9f9f9;
         }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -558,7 +573,7 @@
                     helpText: `¡Importante! La norma exige 4.6 metros de espacio libre entre los balones y cualquier pared. Esto significa que tu área debe tener un LARGO y ANCHO total de al menos ${MINDIMENSIONTOTAL} metros (9.2m) cada uno.`,
                     critical: true,
                     condition: (answer) => parseFloat(answer.largo) >= MINDIMENSIONTOTAL && parseFloat(answer.ancho) >= MINDIMENSIONTOTAL,
-                    failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu área debe medir al menos ${MINDIMECTIONTOTAL} x ${MINDIMENSIONTOTAL} metros.`
+                    failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu área debe medir al menos ${MINDIMENSIONTOTAL} x ${MINDIMENSIONTOTAL} metros.`
                 }
             ]
         };
@@ -599,8 +614,16 @@
 
         // --- EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', function () {
-            saveDniBtn.addEventListener('click', saveDni);
-            dniInput.addEventListener('keyup', (e) => { if(e.key === 'Enter') saveDni(); });
+            // Verificar que los elementos existen antes de agregar event listeners
+            if (saveDniBtn) {
+                saveDniBtn.addEventListener('click', saveDni);
+            }
+            
+            if (dniInput) {
+                dniInput.addEventListener('keyup', (e) => { 
+                    if(e.key === 'Enter') saveDni(); 
+                });
+            }
 
             optionCards.forEach(card => {
                 card.addEventListener('click', function () {
@@ -609,10 +632,21 @@
                 });
             });
 
-            nextQuestionBtn.addEventListener('click', nextQuestion);
-            prevQuestionBtn.addEventListener('click', prevQuestion);
-            restartBtn.addEventListener('click', restartEvaluation);
-            printDeclarationBtn.addEventListener('click', printDeclaration);
+            if (nextQuestionBtn) {
+                nextQuestionBtn.addEventListener('click', nextQuestion);
+            }
+            
+            if (prevQuestionBtn) {
+                prevQuestionBtn.addEventListener('click', prevQuestion);
+            }
+            
+            if (restartBtn) {
+                restartBtn.addEventListener('click', restartEvaluation);
+            }
+            
+            if (printDeclarationBtn) {
+                printDeclarationBtn.addEventListener('click', printDeclaration);
+            }
         });
 
         // --- FUNCIONES PRINCIPALES ---
