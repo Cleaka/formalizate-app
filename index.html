@@ -833,7 +833,7 @@
 
         // --- LÓGICA DE EVALUACIÓN (PASO 3) ---
 
-function evaluateAnswers() {
+        function evaluateAnswers() {
     userData.failures = [];
     userData.recommendations = [];
     let allCriticalPassed = true;
@@ -842,6 +842,7 @@ function evaluateAnswers() {
     let calculated_capacity = 0;
     let final_capacity = 0;
     let area = 0;
+    let balonesCount = 0;
 
     // --- 1. Revisar todas las preguntas ---
     currentQuestionSet.forEach(question => {
@@ -865,53 +866,78 @@ function evaluateAnswers() {
         const answers = userData.answers;
 
         switch (selectedOption) {
-            case '1': // Rack
+            case '1': // Rack - CAPACIDAD FIJA
                 legal_limit = 120;
                 calculated_capacity = 120;
                 final_capacity = 120;
                 break;
             
-            case '2': // Con Techo
-            case '3': // Sin Techo
-                
-                // *** CORRECCIÓN DEL CÁLCULO DE CAPACIDAD ***
-                const totalLargo = parseFloat(answers.storage_dimensions.largo);
-                const totalAncho = parseFloat(answers.storage_dimensions.ancho);
+            case '2': // Con Techo - HASTA 5,000 kg
+                const totalLargo2 = parseFloat(answers.storage_dimensions.largo);
+                const totalAncho2 = parseFloat(answers.storage_dimensions.ancho);
                 
                 // Calcular área útil restando los 4.6m de despeje a cada pared
-                const usableLargo = totalLargo - (WALL_CLEARANCE * 2);
-                const usableAncho = totalAncho - (WALL_CLEARANCE * 2);
+                const usableLargo2 = totalLargo2 - (WALL_CLEARANCE * 2);
+                const usableAncho2 = totalAncho2 - (WALL_CLEARANCE * 2);
                 
-                if (usableLargo > 0 && usableAncho > 0) {
-                    area = usableLargo * usableAncho;
+                if (usableLargo2 > 0 && usableAncho2 > 0) {
+                    area = usableLargo2 * usableAncho2;
                     
                     // Calcular capacidad basada en balones de 10kg
                     const balonDiameter = 0.310; // 310mm en metros
-                    const balonArea = balonDiameter * balonDiameter; // Área que ocupa un balón en planta
                     
                     // Número máximo de balones en un nivel
-                    const balonesPorFilaLargo = Math.floor(usableLargo / balonDiameter);
-                    const balonesPorFilaAncho = Math.floor(usableAncho / balonDiameter);
+                    const balonesPorFilaLargo = Math.floor(usableLargo2 / balonDiameter);
+                    const balonesPorFilaAncho = Math.floor(usableAncho2 / balonDiameter);
                     const balonesPorNivel = balonesPorFilaLargo * balonesPorFilaAncho;
                     
                     // En dos niveles
-                    const totalBalones = balonesPorNivel * 2;
+                    balonesCount = balonesPorNivel * 2;
                     
                     // Capacidad en kg (cada balón es de 10kg)
-                    calculated_capacity = totalBalones * 10;
+                    calculated_capacity = balonesCount * 10;
                 } else {
                     calculated_capacity = 0;
+                    balonesCount = 0;
                 }
                 
-                if (selectedOption === '2') {
-                     const peopleAbove = answers.people_above === 'Sí, viven arriba';
-                     legal_limit = peopleAbove ? 300 : 5000;
-                     final_capacity = Math.min(legal_limit, calculated_capacity);
+                // Límite legal para Local con Techo: 5,000 kg
+                legal_limit = 5000;
+                final_capacity = Math.min(legal_limit, calculated_capacity);
+                break;
+                
+            case '3': // Sin Techo - HASTA 50,000 kg
+                const totalLargo3 = parseFloat(answers.storage_dimensions.largo);
+                const totalAncho3 = parseFloat(answers.storage_dimensions.ancho);
+                
+                // Calcular área útil restando los 4.6m de despeje a cada pared
+                const usableLargo3 = totalLargo3 - (WALL_CLEARANCE * 2);
+                const usableAncho3 = totalAncho3 - (WALL_CLEARANCE * 2);
+                
+                if (usableLargo3 > 0 && usableAncho3 > 0) {
+                    area = usableLargo3 * usableAncho3;
+                    
+                    // Calcular capacidad basada en balones de 10kg
+                    const balonDiameter = 0.310; // 310mm en metros
+                    
+                    // Número máximo de balones en un nivel
+                    const balonesPorFilaLargo = Math.floor(usableLargo3 / balonDiameter);
+                    const balonesPorFilaAncho = Math.floor(usableAncho3 / balonDiameter);
+                    const balonesPorNivel = balonesPorFilaLargo * balonesPorFilaAncho;
+                    
+                    // En dos niveles
+                    balonesCount = balonesPorNivel * 2;
+                    
+                    // Capacidad en kg (cada balón es de 10kg)
+                    calculated_capacity = balonesCount * 10;
                 } else {
-                    // Caso 3 (Sin Techo)
-                    legal_limit = Infinity; 
-                    final_capacity = calculated_capacity;
+                    calculated_capacity = 0;
+                    balonesCount = 0;
                 }
+                
+                // Límite legal para Local sin Techo: 50,000 kg
+                legal_limit = 50000;
+                final_capacity = Math.min(legal_limit, calculated_capacity);
                 break;
         }
         
@@ -919,7 +945,8 @@ function evaluateAnswers() {
             legal_limit: legal_limit,
             area: area,
             calculated_capacity: calculated_capacity,
-            final_capacity: final_capacity
+            final_capacity: final_capacity,
+            balones_count: balonesCount
         };
 
     } else {
@@ -929,7 +956,7 @@ function evaluateAnswers() {
 
     showResults();
     goToStep(3);
-}
+        }
 
         function showResults() {
             resultContainer.innerHTML = '';
@@ -945,25 +972,38 @@ function evaluateAnswers() {
                 const cap = userData.capacity;
                 let capacityHTML = '';
 
-                if (selectedOption === '1') { // Rack
-                     capacityHTML = `
-                        <p>Tu modalidad es RACK. El límite es fijo.</p>
-                        <p class="final-capacity">Capacidad Máxima: ${cap.final_capacity} kg</p>
-                     `;
-                } else {
-                     // ************ MODIFICADO SEGÚN REQUERIMIENTO *************
-                    const dims = userData.answers.storage_dimensions;
-                    capacityHTML = `
-                        <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
-                        <p>Restando los 4.6m de seguridad por lado, tu <strong>ÁREA ÚTIL</strong> es: <strong>${cap.area.toFixed(2)} m²</strong></p>
-                        ${selectedOption === '2' ? `<p>Tu límite legal (por ${userData.answers.people_above === 'Sí, viven arriba' ? 'vivienda arriba' : 'uso exclusivo'}) es: <strong>${cap.legal_limit} kg</strong></p>` : '<p>Tu modalidad (Sin Techo) no tiene límite legal.</p>'}
-                        <p>Tu capacidad por espacio útil (a ${DENSITY_FACTOR_KG_M2} kg/m²) es: <strong>${cap.calculated_capacity.toFixed(0)} kg</strong></p>
-                        <hr style="margin: 10px 0;">
-                        <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity} kg</p>
-                        ${selectedOption === '2' ? `<small>(Se aprueba el valor más bajo entre el límite legal y el de tu espacio)</small>` : ''}
-                    `;
-                }
-
+                // En la parte de capacityHTML dentro de showResults(), reemplazar con:
+if (selectedOption === '1') { // Rack - CAPACIDAD FIJA
+     capacityHTML = `
+        <p>Tu modalidad es RACK/JAULA. El límite es fijo.</p>
+        <p class="final-capacity">Capacidad Máxima: ${cap.final_capacity} kg</p>
+        <p><em>Para racks/jaulas la capacidad máxima permitida es de 120 kg</em></p>
+     `;
+} else if (selectedOption === '2') { // Local con Techo
+     const dims = userData.answers.storage_dimensions;
+     capacityHTML = `
+        <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
+        <p>Área útil para balones (restando 4.6m por lado): <strong>${cap.area.toFixed(2)} m²</strong></p>
+        <p>Número máximo de balones de 10kg en 2 niveles: <strong>${cap.balones_count} balones</strong></p>
+        <p>Tu límite legal para Local con Techo es: <strong>${cap.legal_limit.toLocaleString()} kg</strong></p>
+        <p>Tu capacidad por espacio útil es: <strong>${cap.calculated_capacity.toLocaleString()} kg</strong></p>
+        <hr style="margin: 10px 0;">
+        <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity.toLocaleString()} kg</p>
+        <small>(Se aprueba el valor más bajo entre el límite legal y el de tu espacio)</small>
+    `;
+} else { // Local sin Techo
+     const dims = userData.answers.storage_dimensions;
+     capacityHTML = `
+        <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
+        <p>Área útil para balones (restando 4.6m por lado): <strong>${cap.area.toFixed(2)} m²</strong></p>
+        <p>Número máximo de balones de 10kg en 2 niveles: <strong>${cap.balones_count} balones</strong></p>
+        <p>Tu límite legal para Local sin Techo es: <strong>${cap.legal_limit.toLocaleString()} kg</strong></p>
+        <p>Tu capacidad por espacio útil es: <strong>${cap.calculated_capacity.toLocaleString()} kg</strong></p>
+        <hr style="margin: 10px 0;">
+        <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity.toLocaleString()} kg</p>
+        <small>(Se aprueba el valor más bajo entre el límite legal y el de tu espacio)</small>
+    `;
+}
                 resultContainer.innerHTML = `
                     <div class="result success">
                         <div class="result-icon">🎉</div>
