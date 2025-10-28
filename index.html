@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Osinergmin - Asistente de Formalización (GLP)</title>
     <style>
-        /* (Todos los estilos se mantienen igual) */
+        /* (Estilos CSS) */
         :root {
             --primary: #005A9C;
             --secondary: #00A9E0;
@@ -744,12 +744,11 @@
                     });
                     break;
                 case 'number':
-                    // --- AJUSTE CLAVE 1: Inicializar la respuesta si no existe ---
+                    // --- Inicializar la respuesta si no existe ---
                     if (savedAnswer === undefined) {
                         userData.answers[question.id] = ''; 
                     }
-                    // -----------------------------------------------------------
-
+                    
                     const inputNum = document.createElement('input');
                     inputNum.type = 'number';
                     inputNum.placeholder = '0.0';
@@ -765,18 +764,17 @@
                     qOptions.appendChild(inputNum);
                     break;
                 case 'dimensions':
-                    // --- AJUSTE CLAVE 2: Inicializar la respuesta si no existe ---
-                    if (savedAnswer === undefined) {
+                    // --- Inicializar la respuesta si no existe ---
+                    if (savedAnswer === undefined || savedAnswer === null) {
                         userData.answers[question.id] = {largo: '', ancho: ''}; 
                     }
-                    // -----------------------------------------------------------
                     
                     qOptions.className = 'dimensions-grid';
-                    const currentAnswer = userData.answers[question.id]; // Usamos la respuesta recién inicializada o la guardada
+                    const currentAnswer = userData.answers[question.id]; 
                     const savedLargo = currentAnswer.largo || '';
                     const savedAncho = currentAnswer.ancho || '';
 
-
+                    // Creación de la interfaz para dimensiones
                     qOptions.innerHTML = `
                         <label for="dim-largo">Largo (m):</label>
                         <input type="number" id="dim-largo" placeholder="Ej: 10.0" step="0.1" min="0" value="${savedLargo}">
@@ -787,18 +785,17 @@
                     const largoInput = document.getElementById('dim-largo');
                     const anchoInput = document.getElementById('dim-ancho');
                     
-                    // Usar 'input' para guardar el valor inmediatamente
+                    // Eventos para guardar valores al escribir
                     largoInput.addEventListener('input', () => { 
-                        if (!userData.answers[question.id]) {
-                            userData.answers[question.id] = {};
+                        if (!userData.answers[question.id] || typeof userData.answers[question.id] !== 'object') {
+                             userData.answers[question.id] = {ancho: ''}; // Reparar si se corrompió
                         }
                         userData.answers[question.id].largo = largoInput.value;
                     });
                     
-                    // Usar 'input' para guardar el valor inmediatamente
                     anchoInput.addEventListener('input', () => { 
-                        if (!userData.answers[question.id]) {
-                            userData.answers[question.id] = {};
+                        if (!userData.answers[question.id] || typeof userData.answers[question.id] !== 'object') {
+                             userData.answers[question.id] = {largo: ''}; // Reparar si se corrompió
                         }
                         userData.answers[question.id].ancho = anchoInput.value;
                     });
@@ -827,23 +824,30 @@
             if (question.type === 'binary' || question.type === 'options') {
                 isValid = answer !== undefined && answer !== '';
             } else if (question.type === 'number') {
-                const num = parseFloat(answer);
+                // CORRECCIÓN FINAL: Limpiamos y validamos el string numérico
+                const cleanedAnswer = String(answer || '').trim();
+                const num = parseFloat(cleanedAnswer);
+
                 // Validamos que NO esté vacío Y que sea un número válido Y no-negativo.
-                isValid = answer !== '' && !isNaN(num) && num >= 0;
+                isValid = cleanedAnswer !== '' && !isNaN(num) && num >= 0;
                 
             } else if (question.type === 'dimensions') {
                 
-                // Si answer es undefined (lo cual no debería pasar con el fix en showQuestion), lo inicializamos
+                // Si answer es undefined o null, usamos un objeto vacío para evitar fallas
                 if (!answer) {
                     answer = {largo: '', ancho: ''};
                 }
 
-                const largoNum = parseFloat(answer.largo);
-                const anchoNum = parseFloat(answer.ancho);
+                // CORRECCIÓN FINAL: Limpiamos los valores de largo y ancho.
+                const largoStr = String(answer.largo || '').trim();
+                const anchoStr = String(answer.ancho || '').trim();
+
+                const largoNum = parseFloat(largoStr);
+                const anchoNum = parseFloat(anchoStr);
                 
                 // Se valida que ambos campos NO estén vacíos, sean números válidos y no negativos.
-                isValid = answer.largo !== '' && 
-                          answer.ancho !== '' &&
+                isValid = largoStr !== '' && 
+                          anchoStr !== '' &&
                           !isNaN(largoNum) && largoNum >= 0 &&
                           !isNaN(anchoNum) && anchoNum >= 0;
             }
