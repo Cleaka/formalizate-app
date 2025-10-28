@@ -833,84 +833,103 @@
 
         // --- LÓGICA DE EVALUACIÓN (PASO 3) ---
 
-        function evaluateAnswers() {
-            userData.failures = [];
-            userData.recommendations = [];
-            let allCriticalPassed = true;
-            
-            let legal_limit = 0;
-            let calculated_capacity = 0;
-            let final_capacity = 0;
-            let area = 0;
+function evaluateAnswers() {
+    userData.failures = [];
+    userData.recommendations = [];
+    let allCriticalPassed = true;
+    
+    let legal_limit = 0;
+    let calculated_capacity = 0;
+    let final_capacity = 0;
+    let area = 0;
 
-            // --- 1. Revisar todas las preguntas ---
-            currentQuestionSet.forEach(question => {
-                const answer = userData.answers[question.id];
-                
-                if (answer === 'N/A (Saltada)') return; 
-                
-                if (question.critical && !question.condition(answer)) {
-                    allCriticalPassed = false;
-                    userData.failures.push(question.failureMessage);
-                }
-                
-                if (!question.critical && question.recommendationMessage && question.condition(answer) === false) {
-                     userData.recommendations.push(question.recommendationMessage);
-                }
-            });
-
-            // --- 2. Si pasó, calcular capacidad ---
-            if(allCriticalPassed) {
-                userData.result = 'Aprobado';
-                const answers = userData.answers;
-
-                switch (selectedOption) {
-                    case '1': // Rack
-                        legal_limit = 120;
-                        calculated_capacity = 120;
-                        final_capacity = 120;
-                        break;
-                    
-                    case '2': // Con Techo
-                    case '3': // Sin Techo
-                        
-                        // ************ MODIFICADO SEGÚN REQUERIMIENTO *************
-                        // Calcular área útil basada en la regla de 4.6m (9.2m total)
-                        const totalLargo = parseFloat(answers.storage_dimensions.largo);
-                        const totalAncho = parseFloat(answers.storage_dimensions.ancho);
-                        const usableLargo = totalLargo - MIN_DIMENSION_TOTAL;
-                        const usableAncho = totalAncho - MIN_DIMENSION_TOTAL;
-                        
-                        area = (usableLargo > 0 && usableAncho > 0) ? (usableLargo * usableAncho) : 0;
-                        calculated_capacity = area * DENSITY_FACTOR_KG_M2;
-                        
-                        if (selectedOption === '2') {
-                             const peopleAbove = answers.people_above === 'Sí, viven arriba';
-                             legal_limit = peopleAbove ? 300 : 5000;
-                             final_capacity = Math.min(legal_limit, calculated_capacity);
-                        } else {
-                            // Caso 3 (Sin Techo)
-                            legal_limit = Infinity; 
-                            final_capacity = calculated_capacity;
-                        }
-                        break;
-                }
-                
-                userData.capacity = {
-                    legal_limit: legal_limit,
-                    area: area,
-                    calculated_capacity: calculated_capacity,
-                    final_capacity: final_capacity.toFixed(0) 
-                };
-
-            } else {
-                userData.result = 'No Aprobado';
-                userData.capacity = null;
-            }
-
-            showResults();
-            goToStep(3);
+    // --- 1. Revisar todas las preguntas ---
+    currentQuestionSet.forEach(question => {
+        const answer = userData.answers[question.id];
+        
+        if (answer === 'N/A (Saltada)') return; 
+        
+        if (question.critical && !question.condition(answer)) {
+            allCriticalPassed = false;
+            userData.failures.push(question.failureMessage);
         }
+        
+        if (!question.critical && question.recommendationMessage && question.condition(answer) === false) {
+             userData.recommendations.push(question.recommendationMessage);
+        }
+    });
+
+    // --- 2. Si pasó, calcular capacidad ---
+    if(allCriticalPassed) {
+        userData.result = 'Aprobado';
+        const answers = userData.answers;
+
+        switch (selectedOption) {
+            case '1': // Rack
+                legal_limit = 120;
+                calculated_capacity = 120;
+                final_capacity = 120;
+                break;
+            
+            case '2': // Con Techo
+            case '3': // Sin Techo
+                
+                // *** CORRECCIÓN DEL CÁLCULO DE CAPACIDAD ***
+                const totalLargo = parseFloat(answers.storage_dimensions.largo);
+                const totalAncho = parseFloat(answers.storage_dimensions.ancho);
+                
+                // Calcular área útil restando los 4.6m de despeje a cada pared
+                const usableLargo = totalLargo - (WALL_CLEARANCE * 2);
+                const usableAncho = totalAncho - (WALL_CLEARANCE * 2);
+                
+                if (usableLargo > 0 && usableAncho > 0) {
+                    area = usableLargo * usableAncho;
+                    
+                    // Calcular capacidad basada en balones de 10kg
+                    const balonDiameter = 0.310; // 310mm en metros
+                    const balonArea = balonDiameter * balonDiameter; // Área que ocupa un balón en planta
+                    
+                    // Número máximo de balones en un nivel
+                    const balonesPorFilaLargo = Math.floor(usableLargo / balonDiameter);
+                    const balonesPorFilaAncho = Math.floor(usableAncho / balonDiameter);
+                    const balonesPorNivel = balonesPorFilaLargo * balonesPorFilaAncho;
+                    
+                    // En dos niveles
+                    const totalBalones = balonesPorNivel * 2;
+                    
+                    // Capacidad en kg (cada balón es de 10kg)
+                    calculated_capacity = totalBalones * 10;
+                } else {
+                    calculated_capacity = 0;
+                }
+                
+                if (selectedOption === '2') {
+                     const peopleAbove = answers.people_above === 'Sí, viven arriba';
+                     legal_limit = peopleAbove ? 300 : 5000;
+                     final_capacity = Math.min(legal_limit, calculated_capacity);
+                } else {
+                    // Caso 3 (Sin Techo)
+                    legal_limit = Infinity; 
+                    final_capacity = calculated_capacity;
+                }
+                break;
+        }
+        
+        userData.capacity = {
+            legal_limit: legal_limit,
+            area: area,
+            calculated_capacity: calculated_capacity,
+            final_capacity: final_capacity
+        };
+
+    } else {
+        userData.result = 'No Aprobado';
+        userData.capacity = null;
+    }
+
+    showResults();
+    goToStep(3);
+}
 
         function showResults() {
             resultContainer.innerHTML = '';
