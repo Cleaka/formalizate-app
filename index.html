@@ -1,284 +1,900 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Formalízate OSINERGMIN - Evaluación de Almacenamiento</title>
-<style>
-:root {
-    --primary: #003366;
-    --secondary: #f1c40f;
-    --success: #27ae60;
-    --danger: #e74c3c;
-    --light: #f5f7fa;
-    --dark: #2c3e50;
-}
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: var(--light);
-    margin: 0;
-    color: var(--dark);
-    overflow-x: hidden;
-}
-header {
-    background: linear-gradient(135deg, var(--primary), #0057b8);
-    color: white;
-    padding: 25px;
-    text-align: center;
-    border-bottom: 5px solid var(--secondary);
-}
-header .logo {
-    font-size: 28px;
-    font-weight: bold;
-}
-header .subtitle {
-    font-size: 15px;
-    opacity: 0.9;
-}
-.container {
-    max-width: 850px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    overflow: hidden;
-    animation: fadeIn 1s ease;
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.card {
-    padding: 25px;
-}
-.progress-bar {
-    height: 10px;
-    background: #ddd;
-    border-radius: 5px;
-    overflow: hidden;
-    margin: 0 25px 20px;
-}
-.progress {
-    height: 100%;
-    background: var(--secondary);
-    width: 0%;
-    transition: width 0.5s ease;
-}
-.option-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-}
-.option-card {
-    background: #f9f9f9;
-    border-radius: 10px;
-    border: 2px solid transparent;
-    text-align: center;
-    padding: 20px;
-    flex: 1 1 250px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-.option-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--secondary);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-.option-card.selected {
-    border-color: var(--secondary);
-    background: #fffbe6;
-}
-.option-icon {
-    font-size: 40px;
-    color: var(--primary);
-}
-.btn {
-    background-color: var(--primary);
-    color: white;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    margin: 10px 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-.btn:hover {
-    background-color: #004080;
-}
-.btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-.step {
-    display: none;
-}
-.step.active {
-    display: block;
-}
-.result {
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-}
-.result.success {
-    background: #e8f8ec;
-    border: 2px solid var(--success);
-    color: var(--success);
-}
-.result.warning {
-    background: #fff4e6;
-    border: 2px solid #f39c12;
-    color: #f39c12;
-}
-.recommendation-item {
-    background: #fff4e6;
-    border-left: 5px solid #f39c12;
-    padding: 10px;
-    margin: 8px 0;
-}
-select, input, textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 15px;
-}
-label {
-    font-weight: 600;
-    margin-bottom: 6px;
-    display: block;
-}
-footer {
-    background: var(--primary);
-    color: white;
-    text-align: center;
-    padding: 10px;
-    font-size: 14px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Osinergmin - Asistente de Formalización</title>
+    <style>
+        :root {
+            --primary: #005A9C; /* Azul Osinergmin */
+            --secondary: #00A9E0; /* Celeste Osinergmin */
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        /* Ocultar pasos */
+        .step { display: none; }
+        .step.active { display: block; }
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        /* ----- Estilos de Selección de Opciones (Paso 1) ----- */
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .option-card {
+            border: 2px solid var(--light);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+        .option-card:hover {
+            border-color: var(--secondary);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .option-card.selected {
+            border-color: var(--secondary);
+            background-color: rgba(0, 169, 224, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transform: translateY(0);
+        }
+        .option-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .option-card h3 {
+            color: var(--dark);
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        .option-card p {
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        /* ----- Estilos del Asistente (Paso 2) ----- */
+        #question-display {
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .question-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .help-text {
+            font-size: 0.9em;
+            color: #555;
+            background-color: #f9f9f9;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        .answer-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        /* Botones grandes para Sí/No/Opciones */
+        .btn-option {
+            display: block;
+            width: 100%;
+            background-color: #fff;
+            color: var(--dark);
+            padding: 20px;
+            border: 2px solid var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        .btn-option:hover {
+            border-color: var(--secondary);
+            background-color: rgba(0, 169, 224, 0.05);
+        }
+        .btn-option.selected {
+            border-color: var(--secondary);
+            background-color: rgba(0, 169, 224, 0.1);
+            color: var(--primary);
+        }
+        /* Botones para Sí y No en la misma fila */
+        .answer-options.binary {
+             grid-template-columns: 1fr 1fr;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        input[type="number"] {
+            font-size: 1.2em;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* ----- Botones de Navegación ----- */
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #007bbd;
+        }
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .btn-prev {
+            background-color: var(--dark);
+        }
+        .btn-prev:hover {
+            background-color: #4a637c;
+        }
+        .btn-eval {
+            background-color: var(--success);
+        }
+        .btn-eval:hover {
+            background-color: #219653;
+        }
+
+        /* ----- Resultados (Paso 3) ----- */
+        .result {
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .result h3 { font-size: 1.8em; margin-bottom: 10px; }
+        .result-icon { font-size: 4em; margin-bottom: 15px; }
+        
+        .success {
+            background-color: rgba(39, 174, 96, 0.1);
+            border: 2px solid var(--success);
+            color: #219653;
+        }
+        .warning {
+            background-color: rgba(231, 76, 60, 0.1);
+            border: 2px solid var(--danger);
+            color: #c0392b;
+        }
+        .recommendations {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .recommendation-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--warning);
+            background-color: rgba(243, 156, 18, 0.1);
+            color: #d35400;
+            font-weight: 500;
+        }
+        .recommendation-item.critical {
+            border-left-color: var(--danger);
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        /* ----- Otros ----- */
+        .progress-bar {
+            height: 10px;
+            background-color: var(--light);
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: var(--secondary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .dni-section {
+            background-color: rgba(0, 169, 224, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .hidden { display: none; }
+        .declaration {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+    </style>
 </head>
 <body>
-<header>
-    <div class="logo">🟦 OSINERGMIN - Formalízate</div>
-    <div class="subtitle">Evaluación para almacenamiento de balones de gas</div>
-</header>
+    <div class="container">
+        <header>
+            <div class="logo">🛡️ Osinergmin</div>
+            <div class="subtitle">Asistente de Pre-evaluación para Venta de Gas</div>
+        </header>
 
-<div class="container">
-    <div class="progress-bar"><div class="progress" id="progress"></div></div>
-    <div class="card step active" id="step1">
-        <h2>1️⃣ ¿Dónde desea almacenar los balones?</h2>
-        <div class="option-grid">
-            <div class="option-card" data-option="1"><div class="option-icon">🏠</div><h3>Espacio con techo</h3></div>
-            <div class="option-card" data-option="2"><div class="option-icon">🌤️</div><h3>Sin techo</h3></div>
-            <div class="option-card" data-option="3"><div class="option-icon">🛒</div><h3>En rack</h3></div>
+        <div class="dni-section card">
+            <h2>¡Hola! 👋</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Vamos a ayudarte a revisar si tu local cumple los requisitos de seguridad. Para guardar tu avance y usarlo en la oficina, ingresa tu DNI.</p>
+            <div class="form-group">
+                <label for="dni">Ingresa tu DNI (8 dígitos):</label>
+                <input type="tel" id="dni" placeholder="Ej: 12345678" maxlength="8" pattern="[0-9]{8}">
+            </div>
+            <button class="btn" id="saveDni">Guardar DNI y Empezar</button>
+            <div id="dniMessage" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
-        <button class="btn" id="next1" disabled>Siguiente ➡️</button>
+
+        <div class="card" id="wizard-container" style="display: none;">
+            
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+
+            <div class="step active" id="step1">
+                <h2>1. ¿Dónde guardarás los balones?</h2>
+                <div class="option-grid">
+                    <div class="option-card" data-option="1">
+                        <div class="option-icon">🏠</div>
+                        <h3>Espacio CON Techo</h3>
+                        <p>Almacén, cuarto, cochera techada, etc.</p>
+                    </div>
+                    <div class="option-card" data-option="2">
+                        <div class="option-icon">☀️</div>
+                        <h3>Espacio SIN Techo</h3>
+                        <p>Patio, jardín, área al aire libre.</p>
+                    </div>
+                    <div class="option-card" data-option="3">
+                        <div class="option-icon">🗄️</div>
+                        <h3>En Rack (Jaula)</h3>
+                        <p>En el frontis o retiro de la casa.</p>
+                    </div>
+                </div>
+                </div>
+
+            <div class="step" id="step2">
+                <h2 id="question-title">2. Revisión de Seguridad</h2>
+                <div id="question-display">
+                    </div>
+                <div class="navigation-buttons">
+                    <button class="btn btn-prev" id="prevQuestion">⬅️ Anterior</button>
+                    <button class="btn" id="nextQuestion">Siguiente ➡️</button>
+                </div>
+            </div>
+
+            <div class="step" id="step3">
+                <h2>Resultado de la Pre-evaluación</h2>
+                <div id="result-container">
+                    </div>
+                <button class="btn" id="restart">Revisar de Nuevo</button>
+            </div>
+        </div>
+
+        <div class="declaration hidden" id="declaration">
+            <h2>Declaración Jurada</h2>
+            <p><strong>DNI:</strong> <span id="decl-dni"></span></p>
+            <p>Con esta fecha, declaro que las respuestas marcadas son verdaderas y reflejan la realidad de mi local.</p>
+            <div id="declaration-content"></div>
+            <button class="btn" id="printDeclaration">Imprimir DJ</button>
+        </div>
     </div>
 
-    <div class="card step" id="step2">
-        <h2>2️⃣ Evaluación de condiciones</h2>
-        <div id="questions-container"></div>
-        <button class="btn" id="prev2">⬅️ Atrás</button>
-        <button class="btn" id="next2">Evaluar ✅</button>
-    </div>
+    <script>
+        // --- PREGUNTAS (El cerebro del asistente) ---
+        // Convertimos las preguntas de texto a opciones claras.
+        const questions = {
+            1: [ // Con Techo
+                {
+                    id: 'businesses',
+                    text: '⚠️ ¡Atención! ¿Alguno de tus vecinos (costados, atrás, frente) tiene un taller de soldadura, mecánica, carpintería o un negocio que bote chispas?',
+                    type: 'binary',
+                    options: ['Sí, hay un taller cerca', 'No, son casas o bodegas'],
+                    critical: true,
+                    condition: (answer) => answer === 'No, son casas o bodegas',
+                    failureMessage: '¡Requisito Insubsistible! No puedes almacenar gas cerca de negocios que generen chispas (talleres, soldadura, etc.) por alto riesgo de explosión.'
+                },
+                {
+                    id: 'ventilation_type',
+                    text: '¿La ventilación de tu almacén es PERMANENTE? (Ej: rejas, calados, un hueco que no se puede cerrar)',
+                    type: 'binary',
+                    options: ['Sí, es permanente (rejas)', 'No, tiene ventanas o se cierra'],
+                    critical: true,
+                    condition: (answer) => answer === 'Sí, es permanente (rejas)',
+                    failureMessage: 'La ventilación debe ser permanente (con rejas). Las ventanas que se cierran no cuentan.'
+                },
+                {
+                    id: 'ventilation_size',
+                    text: '¿Qué tamaño tiene esa ventilación (en metros cuadrados)?',
+                    type: 'number',
+                    helpText: 'Mide el ANCHO y el ALTO de tu reja. Si mide 2m de ancho por 3m de alto, son 6 metros cuadrados.',
+                    critical: true,
+                    condition: (answer) => parseFloat(answer) >= 6,
+                    failureMessage: 'La ventilación debe ser de al menos 6 metros cuadrados para asegurar que el gas escape si hay una fuga.'
+                },
+                {
+                    id: 'transformer_nearby',
+                    text: '¿Hay algún transformador eléctrico (esos grises en el poste) cerca de tu casa?',
+                    type: 'binary',
+                    options: ['Sí, hay uno cerca', 'No hay ninguno cerca'],
+                    critical: false // La criticidad la tiene la distancia
+                },
+                {
+                    id: 'transformer_distance',
+                    text: '¿A cuántos metros está el transformador de tu almacén?',
+                    type: 'number',
+                    helpText: 'Mide en línea recta desde el borde de tu almacén (donde irán los balones) hasta el transformador.',
+                    critical: true,
+                    dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' }, // Solo se muestra si la anterior fue "Sí"
+                    condition: (answer) => parseFloat(answer) >= 7.6,
+                    failureMessage: '¡Requisito Insubsistible! La distancia mínima al transformador debe ser 7.6 metros. El riesgo eléctrico es muy alto.'
+                },
+                {
+                    id: 'materials_roof',
+                    text: '¿De qué material es el TECHO de tu almacén?',
+                    type: 'options',
+                    options: ['Cemento / Ladrillo / Noble', 'Madera', 'Estera / Plástico / Calamina'],
+                    critical: true,
+                    condition: (answer) => answer === 'Cemento / Ladrillo / Noble',
+                    failureMessage: 'El TECHO no puede ser de material inflamable (madera, estera, plástico).'
+                },
+                {
+                    id: 'materials_floor',
+                    text: '¿De qué material es el PISO de tu almacén?',
+                    type: 'options',
+                    options: ['Cemento / Concreto', 'Tierra / Afirmado', 'Madera / Plástico'],
+                    critical: true,
+                    condition: (answer) => answer === 'Cemento / Concreto' || answer === 'Tierra / Afirmado',
+                    failureMessage: 'El PISO no puede ser de material inflamable (madera, plástico).'
+                },
+                {
+                    id: 'materials_walls',
+                    text: '¿De qué material son las PAREDES de tu almacén?',
+                    type: 'options',
+                    options: ['Cemento / Ladrillo / Noble', 'Madera', 'Estera / Plástico / Quincha'],
+                    critical: true,
+                    condition: (answer) => answer === 'Cemento / Ladrillo / Noble',
+                    failureMessage: 'Las PAREDES no pueden ser de material inflamable (madera, estera, quincha).'
+                }
+            ],
+            2: [ // Sin Techo
+                {
+                    id: 'businesses',
+                    text: '⚠️ ¡Atención! ¿Alguno de tus vecinos (costados, atrás, frente) tiene un taller de soldadura, mecánica, carpintería o un negocio que bote chispas?',
+                    type: 'binary',
+                    options: ['Sí, hay un taller cerca', 'No, son casas o bodegas'],
+                    critical: true,
+                    condition: (answer) => answer === 'No, son casas o bodegas',
+                    failureMessage: '¡Requisito Insubsistible! No puedes almacenar gas cerca de negocios que generen chispas (talleres, soldadura, etc.) por alto riesgo de explosión.'
+                },
+                {
+                    id: 'transformer_nearby',
+                    text: '¿Hay algún transformador eléctrico (esos grises en el poste) cerca de tu casa?',
+                    type: 'binary',
+                    options: ['Sí, hay uno cerca', 'No hay ninguno cerca'],
+                    critical: false
+                },
+                {
+                    id: 'transformer_distance',
+                    text: '¿A cuántos metros está el transformador de tu almacén?',
+                    type: 'number',
+                    helpText: 'Mide en línea recta desde el borde de tu almacén (donde irán los balones) hasta el transformador.',
+                    critical: true,
+                    dependsOn: { id: 'transformer_nearby', value: 'Sí, hay uno cerca' },
+                    condition: (answer) => parseFloat(answer) >= 7.6,
+                    failureMessage: '¡Requisito Insubsistible! La distancia mínima al transformador debe ser 7.6 metros. El riesgo eléctrico es muy alto.'
+                },
+                {
+                    id: 'has_door',
+                    text: '¿Ese espacio (patio) tiene una puerta que lo encierre?',
+                    type: 'binary',
+                    options: ['Sí, tiene puerta', 'No, es abierto'],
+                    critical: true,
+                    condition: (answer) => answer === 'No, es abierto',
+                    failureMessage: 'El espacio sin techo debe ser abierto, no un cuarto cerrado sin techo, para que el aire circule.'
+                },
+                {
+                    id: 'has_electricity',
+                    text: '¿Pasan cables eléctricos (de luz, tomacorrientes) por ese espacio?',
+                    type: 'binary',
+                    options: ['Sí, hay cables', 'No hay cables eléctricos'],
+                    critical: true,
+                    condition: (answer) => answer === 'No hay cables eléctricos',
+                    failureMessage: 'No debe haber ningún tipo de instalación eléctrica (cables, enchufes) en el área de almacenamiento.'
+                },
+                {
+                    id: 'materials_floor',
+                    text: '¿De qué material es el PISO de ese espacio?',
+                    type: 'options',
+                    options: ['Cemento / Concreto', 'Tierra / Afirmado', 'Madera / Plástico / Grass sintético'],
+                    critical: true,
+                    condition: (answer) => answer === 'Cemento / Concreto' || answer === 'Tierra / Afirmado',
+                    failureMessage: 'El PISO no puede ser de material inflamable (madera, plástico, grass).'
+                },
+                {
+                    id: 'materials_walls',
+                    text: '¿De qué material son las PAREDES que rodean ese espacio?',
+                    type: 'options',
+                    options: ['Cemento / Ladrillo / Noble', 'Madera', 'Estera / Plástico / Quincha'],
+                    critical: true,
+                    condition: (answer) => answer === 'Cemento / Ladrillo / Noble',
+                    failureMessage: 'Las PAREDES que rodean el patio no pueden ser de material inflamable.'
+                }
+            ],
+            3: [ // En Rack
+                {
+                    id: 'has_retiro',
+                    text: '¿Tu casa tiene un "retiro"? (Un espacio o jardín entre tu puerta y la vereda/pista)',
+                    type: 'binary',
+                    options: ['Sí, tengo retiro/jardín', 'No, mi casa da a la vereda'],
+                    critical: true,
+                    condition: (answer) => answer === 'Sí, tengo retiro/jardín',
+                    failureMessage: '¡Requisito Insubsistible! Para usar un rack (jaula), es obligatorio tener un espacio de retiro. No puede estar en la vereda.'
+                }
+                // Aquí se podrían agregar más preguntas específicas para el rack si las tuvieras.
+            ]
+        };
 
-    <div class="card step" id="step3">
-        <h2>3️⃣ Resultado</h2>
-        <div id="result-container"></div>
-        <button class="btn" id="restart">🔁 Nueva evaluación</button>
-    </div>
-</div>
+        // --- VARIABLES GLOBALES ---
+        let currentStep = 1;
+        let currentQuestionIndex = 0;
+        let selectedOption = null;
+        let userData = {
+            dni: '',
+            option: '',
+            optionText: '',
+            answers: {},
+            result: '',
+            recommendations: []
+        };
+        let totalQuestions = 0;
 
-<footer>
-    © 2025 OSINERGMIN | Proyecto Formalízate
-</footer>
+        // --- ELEMENTOS DOM ---
+        const steps = document.querySelectorAll('.step');
+        const progressBar = document.getElementById('progress');
+        const dniInput = document.getElementById('dni');
+        const saveDniBtn = document.getElementById('saveDni');
+        const dniMessage = document.getElementById('dniMessage');
+        const wizardContainer = document.getElementById('wizard-container');
+        
+        // Step 1
+        const optionCards = document.querySelectorAll('.option-card');
+        
+        // Step 2
+        const questionDisplay = document.getElementById('question-display');
+        const nextQuestionBtn = document.getElementById('nextQuestion');
+        const prevQuestionBtn = document.getElementById('prevQuestion');
+        
+        // Step 3
+        const resultContainer = document.getElementById('result-container');
+        const restartBtn = document.getElementById('restart');
+        
+        // Declaración
+        const declaration = document.getElementById('declaration');
+        const declDni = document.getElementById('decl-dni');
+        const declarationContent = document.getElementById('declaration-content');
+        const printDeclarationBtn = document.getElementById('printDeclaration');
 
-<script>
-let currentStep = 1;
-let selectedOption = null;
-const steps = document.querySelectorAll('.step');
-const optionCards = document.querySelectorAll('.option-card');
-const next1 = document.getElementById('next1');
-const prev2 = document.getElementById('prev2');
-const next2 = document.getElementById('next2');
-const restart = document.getElementById('restart');
-const progress = document.getElementById('progress');
-const resultContainer = document.getElementById('result-container');
-const questionsContainer = document.getElementById('questions-container');
+        // --- EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', function () {
+            saveDniBtn.addEventListener('click', saveDni);
+            dniInput.addEventListener('keyup', (e) => {
+                if(e.key === 'Enter') saveDni();
+            });
 
-const questions = {
-    1: [
-        { id:'vent', text:'¿Cuenta con ventilación permanente?', options:['Sí','No'], valid:'Sí' },
-        { id:'dist', text:'¿Está a más de 7.6 m de un transformador eléctrico?', options:['Sí','No'], valid:'Sí' },
-        { id:'techo', text:'Material del techo', options:['Concreto','Metal','Madera','Plástico'], valid:['Concreto','Metal'] }
-    ],
-    2: [
-        { id:'dist', text:'¿Está a más de 7.6 m del transformador?', options:['Sí','No'], valid:'Sí' },
-        { id:'piso', text:'Material del piso', options:['Cemento','Tierra','Madera'], valid:'Cemento' }
-    ],
-    3: [
-        { id:'retiro', text:'¿Tiene espacio de retiro entre la vereda y la casa?', options:['Sí','No'], valid:'Sí' }
-    ]
-};
+            optionCards.forEach(card => {
+                card.addEventListener('click', function () {
+                    selectOption(this);
+                    // Ir al siguiente paso automáticamente al seleccionar
+                    setTimeout(goToStep2, 300); 
+                });
+            });
 
-optionCards.forEach(card=>{
-    card.addEventListener('click',()=>{
-        optionCards.forEach(c=>c.classList.remove('selected'));
-        card.classList.add('selected');
-        selectedOption = card.dataset.option;
-        next1.disabled = false;
-    });
-});
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            prevQuestionBtn.addEventListener('click', prevQuestion);
+            
+            restartBtn.addEventListener('click', restartEvaluation);
+            printDeclarationBtn.addEventListener('click', printDeclaration);
+        });
 
-next1.onclick = ()=>goToStep(2);
-prev2 && (prev2.onclick = ()=>goToStep(1));
-next2.onclick = evaluate;
-restart.onclick = ()=>location.reload();
+        // --- FUNCIONES ---
 
-function goToStep(n){
-    steps.forEach(s=>s.classList.remove('active'));
-    document.getElementById(`step${n}`).classList.add('active');
-    currentStep = n;
-    progress.style.width = `${(n/3)*100}%`;
-    if(n===2) loadQuestions();
-}
-
-function loadQuestions(){
-    questionsContainer.innerHTML='';
-    questions[selectedOption].forEach(q=>{
-        const div=document.createElement('div');
-        div.className='form-group';
-        div.innerHTML=`<label>${q.text}</label>`;
-        const sel=document.createElement('select');
-        sel.id=q.id;
-        sel.innerHTML='<option value="">-- Seleccione --</option>'+q.options.map(o=>`<option>${o}</option>`).join('');
-        div.appendChild(sel);
-        questionsContainer.appendChild(div);
-    });
-}
-
-function evaluate(){
-    const list = questions[selectedOption];
-    let passed=true;
-    resultContainer.innerHTML='';
-    list.forEach(q=>{
-        const val=document.getElementById(q.id).value;
-        if(!val || (Array.isArray(q.valid)?!q.valid.includes(val):val!==q.valid)){
-            passed=false;
-            const rec=document.createElement('div');
-            rec.className='recommendation-item';
-            rec.textContent=`⚠️ ${q.text} no cumple con el requisito.`;
-            resultContainer.appendChild(rec);
+        function saveDni() {
+            const dni = dniInput.value.trim();
+            if (dni.length === 8 && /^[0-9]+$/.test(dni)) {
+                userData.dni = dni;
+                dniMessage.textContent = '✓ DNI guardado. ¡Comencemos!';
+                dniMessage.style.color = 'green';
+                dniInput.disabled = true;
+                saveDniBtn.disabled = true;
+                wizardContainer.style.display = 'block';
+                updateProgress(); // Iniciar barra de progreso
+            } else {
+                dniMessage.textContent = 'Ingresa un DNI válido (8 números).';
+                dniMessage.style.color = 'red';
+            }
         }
-    });
-    const res=document.createElement('div');
-    res.className='result '+(passed?'success':'warning');
-    res.innerHTML=passed?'<h3>✅ Cumple con los requisitos mínimos.</h3>':'<h3>⚠️ No cumple con todos los requisitos críticos.</h3>';
-    resultContainer.prepend(res);
-    goToStep(3);
-}
-</script>
+
+        function selectOption(card) {
+            optionCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedOption = card.getAttribute('data-option');
+            userData.option = selectedOption;
+            userData.optionText = card.querySelector('h3').textContent;
+            
+            // Contar total de preguntas (considerando condicionales)
+            totalQuestions = questions[selectedOption].length; 
+        }
+
+        function goToStep(stepNumber) {
+            currentStep = stepNumber;
+            steps.forEach(step => step.classList.remove('active'));
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+            updateProgress();
+        }
+
+        function goToStep2() {
+            if (!selectedOption) return;
+            currentQuestionIndex = 0;
+            userData.answers = {}; // Limpiar respuestas si vuelve
+            showQuestion(currentQuestionIndex);
+            goToStep(2);
+        }
+
+        function updateProgress() {
+            let progressPercent = 0;
+            if (currentStep === 1) {
+                progressPercent = 5; // Un pequeño avance al inicio
+            } else if (currentStep === 2) {
+                // Progreso basado en preguntas
+                progressPercent = 10 + (currentQuestionIndex / totalQuestions) * 80;
+            } else if (currentStep === 3) {
+                progressPercent = 100;
+            }
+            progressBar.style.width = `${progressPercent}%`;
+        }
+
+        // --- LÓGICA DEL ASISTENTE (PASO 2) ---
+
+        function showQuestion(index) {
+            // Limpiar pregunta anterior
+            questionDisplay.innerHTML = '';
+            
+            const question = questions[selectedOption][index];
+
+            // --- Lógica de Preguntas Condicionales ---
+            if (question.dependsOn) {
+                const dependency = question.dependsOn;
+                const dependencyAnswer = userData.answers[dependency.id];
+                
+                // Si la respuesta de la dependencia NO es la requerida, saltar esta pregunta
+                if (dependencyAnswer !== dependency.value) {
+                    // Guardar una respuesta "N/A" para esta pregunta saltada
+                    userData.answers[question.id] = 'N/A (Saltada)';
+                    // Decidir si ir adelante o atrás
+                    const direction = index > currentQuestionIndex ? 1 : -1;
+                    const nextIndex = index + direction;
+
+                    if (nextIndex >= 0 && nextIndex < totalQuestions) {
+                        showQuestion(nextIndex); // Saltar a la siguiente/anterior
+                    } else if (nextIndex >= totalQuestions) {
+                        evaluateAnswers(); // Si era la última, evaluar
+                    } else {
+                        goToStep(1); // Si era la primera, ir al paso 1
+                    }
+                    return; // Detener ejecución
+                }
+            }
+
+            // Actualizar índice global
+            currentQuestionIndex = index;
+            
+            // Crear el texto de la pregunta
+            const qText = document.createElement('div');
+            qText.className = 'question-text';
+            qText.textContent = question.text;
+            questionDisplay.appendChild(qText);
+            
+            // Añadir texto de ayuda si existe
+            if (question.helpText) {
+                const qHelp = document.createElement('div');
+                qHelp.className = 'help-text';
+                qHelp.textContent = `💡 ¿Cómo mido esto? ${question.helpText}`;
+                questionDisplay.appendChild(qHelp);
+            }
+
+            // Crear las opciones de respuesta
+            const qOptions = document.createElement('div');
+            qOptions.className = 'answer-options';
+            
+            const savedAnswer = userData.answers[question.id];
+
+            switch (question.type) {
+                case 'binary':
+                    qOptions.classList.add('binary');
+                    question.options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-option';
+                        btn.textContent = opt;
+                        if(opt === savedAnswer) btn.classList.add('selected');
+                        btn.onclick = () => {
+                            // Guardar respuesta y avanzar automáticamente
+                            userData.answers[question.id] = opt;
+                            // Resaltar selección
+                            qOptions.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+                            btn.classList.add('selected');
+                            // Avanzar
+                            setTimeout(nextQuestion, 200);
+                        };
+                        qOptions.appendChild(btn);
+                    });
+                    break;
+                case 'options':
+                    question.options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-option';
+                        btn.textContent = opt;
+                        if(opt === savedAnswer) btn.classList.add('selected');
+                        btn.onclick = () => {
+                            userData.answers[question.id] = opt;
+                            qOptions.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+                            btn.classList.add('selected');
+                            setTimeout(nextQuestion, 200);
+                        };
+                        qOptions.appendChild(btn);
+                    });
+                    break;
+                case 'number':
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.placeholder = '0.0';
+                    input.value = (savedAnswer && savedAnswer !== 'N/A') ? savedAnswer : '';
+                    input.onchange = () => {
+                        userData.answers[question.id] = input.value;
+                    };
+                    qOptions.appendChild(input);
+                    // Para números, no avanzamos auto, el usuario usa el botón "Siguiente"
+                    break;
+            }
+            
+            questionDisplay.appendChild(qOptions);
+            
+            // Actualizar botones de navegación
+            prevQuestionBtn.disabled = (index === 0);
+            nextQuestionBtn.textContent = (index === totalQuestions - 1) ? 'Finalizar Evaluación 🏁' : 'Siguiente ➡️';
+            
+            // Ocultar "Siguiente" si es de botones (avanza solo)
+            if(question.type === 'binary' || question.type === 'options') {
+                nextQuestionBtn.style.display = 'none';
+            } else {
+                nextQuestionBtn.style.display = 'inline-block';
+            }
+
+            updateProgress();
+        }
+
+        function nextQuestion() {
+            const question = questions[selectedOption][currentQuestionIndex];
+            
+            // Validar respuesta actual antes de avanzar
+            if (!userData.answers[question.id]) {
+                alert('Por favor, responde la pregunta.');
+                return;
+            }
+
+            if (currentQuestionIndex < totalQuestions - 1) {
+                showQuestion(currentQuestionIndex + 1);
+            } else {
+                // Última pregunta
+                evaluateAnswers();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                showQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        // --- LÓGICA DE EVALUACIÓN (PASO 3) ---
+
+        function evaluateAnswers() {
+            const optionQuestions = questions[selectedOption];
+            userData.recommendations = [];
+            let allCriticalPassed = true;
+
+            optionQuestions.forEach(question => {
+                const answer = userData.answers[question.id];
+                
+                // Si la pregunta fue saltada (N/A), no la evaluamos
+                if (answer === 'N/A (Saltada)') return; 
+                
+                if (question.critical && !question.condition(answer)) {
+                    allCriticalPassed = false;
+                    userData.recommendations.push({
+                        message: question.failureMessage,
+                        critical: question.failureMessage.includes('Insubsistible') // Marcar si es insubsistible
+                    });
+                }
+            });
+
+            userData.result = allCriticalPassed ? 'Aprobado' : 'Requiere Mejoras';
+            showResults(allCriticalPassed);
+            goToStep(3);
+        }
+
+        function showResults(allCriticalPassed) {
+            resultContainer.innerHTML = '';
+            if (allCriticalPassed) {
+                resultContainer.innerHTML = `
+                    <div class="result success">
+                        <div class="result-icon">🎉</div>
+                        <h3>¡Felicitaciones!</h3>
+                        <p>Has pasado la pre-evaluación de seguridad.</p>
+                        <p style="margin-top: 15px; font-weight: bold;">Tu espacio cumple con los requisitos más importantes. El siguiente paso es ir a la oficina.</p>
+                        <p style="margin-top: 15px;">Acércate a Osinergmin con tu DNI. Tus respuestas ya están guardadas para generar tu Declaración Jurada.</p>
+                    </div>
+                `;
+            } else {
+                let recommendationsHTML = '<div class="recommendations"><h4>Debes corregir lo siguiente:</h4>';
+                let hasCritical = false;
+                
+                userData.recommendations.forEach(rec => {
+                    if (rec.critical) hasCritical = true;
+                    recommendationsHTML += `<div class="recommendation-item ${rec.critical ? 'critical' : ''}">${rec.message}</div>`;
+                });
+                recommendationsHTML += '</div>';
+
+                resultContainer.innerHTML = `
+                    <div class="result warning">
+                        <div class="result-icon">⚠️</div>
+                        <h3>¡Atención! Hay puntos por mejorar</h3>
+                        <p>Tu espacio aún no cumple con todos los requisitos de seguridad.</p>
+                        ${hasCritical ? '<p style="margin-top:15px; font-weight:bold;">Detectamos un REQUISITO INSUBSISTIBLE. Esto significa que en este local NO es posible la formalización.</p>' : ''}
+                        ${recommendationsHTML}
+                        <p style="margin-top:20px;">Por favor, realiza las mejoras y vuelve a intentarlo. ¡Estamos para ayudarte!</p>
+                    </div>
+                `;
+            }
+
+            // Guardar en LocalStorage y mostrar DJ
+            if (userData.dni) {
+                localStorage.setItem(`evaluacion_${userData.dni}`, JSON.stringify(userData));
+            }
+            generateDeclaration();
+            declaration.classList.remove('hidden');
+        }
+
+        function generateDeclaration() {
+            declDni.textContent = userData.dni || 'No registrado';
+            let contenido = `
+                <p><strong>Tipo de Almacén:</strong> ${userData.optionText}</p>
+                <p><strong>Resultado:</strong> ${userData.result}</p>
+                <strong>Respuestas Marcadas:</strong>
+                <ul>
+            `;
+            
+            questions[selectedOption].forEach(q => {
+                const answer = userData.answers[q.id] || 'No respondida';
+                // No mostrar preguntas saltadas en la DJ
+                if(answer !== 'N/A (Saltada)') {
+                     contenido += `<li><strong>${q.text}:</strong> ${answer}</li>`;
+                }
+            });
+            
+            contenido += `</ul>`;
+            declarationContent.innerHTML = contenido;
+        }
+
+        function printDeclaration() {
+            window.print();
+        }
+
+        function restartEvaluation() {
+            currentStep = 1;
+            currentQuestionIndex = 0;
+            selectedOption = null;
+            userData.option = '';
+            userData.optionText = '';
+            userData.answers = {};
+            userData.result = '';
+            userData.recommendations = [];
+            
+            optionCards.forEach(card => card.classList.remove('selected'));
+            declaration.classList.add('hidden');
+            questionDisplay.innerHTML = '';
+            
+            goToStep(1);
+            updateProgress(); // Resetea la barra
+        }
+    </script>
 </body>
 </html>
+
