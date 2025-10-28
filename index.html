@@ -810,27 +810,44 @@
             const question = currentQuestionSet[currentQuestionIndex];
             let answer = userData.answers[question.id];
             
+            // --- NUEVO: LIMPIEZA INICIAL DE LA RESPUESTA ---
+            // Asegura que answer no sea undefined/null para tipos numéricos si el campo está vacío.
+            if (question.type === 'number' && (answer === undefined || answer === null || answer === '')) {
+                answer = ''; // Lo tratamos como string vacío
+            }
+            if (question.type === 'dimensions' && (answer === undefined || answer === null)) {
+                answer = {largo: '', ancho: ''};
+            }
+            // ------------------------------------------------
+         
             // Validar según el tipo de pregunta
             let isValid = true;
             
             if (question.type === 'binary' || question.type === 'options') {
                 isValid = answer !== undefined && answer !== '';
             } else if (question.type === 'number') {
-                // Se agregó la condición de que el valor no sea solo un punto decimal (e.g. '.').
-                isValid = answer !== undefined && answer !== '' && !isNaN(parseFloat(answer)) && parseFloat(answer) >= 0;
+                const num = parseFloat(answer);
+                // La respuesta debe existir Y ser un número válido Y ser no-negativo.
+                // answer.trim() se usa para que no considere válido solo el string vacío.
+                isValid = answer !== '' && !isNaN(num) && num >= 0;
+                
             } else if (question.type === 'dimensions') {
-                isValid = answer !== undefined && 
-                          answer.largo !== undefined && answer.largo !== '' && 
-                          answer.ancho !== undefined && answer.ancho !== '' &&
-                          !isNaN(parseFloat(answer.largo)) && parseFloat(answer.largo) >= 0 &&
-                          !isNaN(parseFloat(answer.ancho)) && parseFloat(answer.ancho) >= 0;
+                
+                const largoNum = parseFloat(answer.largo);
+                const anchoNum = parseFloat(answer.ancho);
+                
+                // Se valida que ambos campos NO estén vacíos, sean números válidos y no negativos.
+                isValid = answer.largo !== '' &&
+                          answer.ancho !== '' &&
+                          !isNaN(largoNum) && largoNum >= 0 &&
+                          !isNaN(anchoNum) && anchoNum >= 0;
             }
             
             if (!isValid) {
                 alert('Por favor, responde la pregunta correctamente.');
                 return;
             }
-
+         
             if (currentQuestionIndex < totalQuestions - 1) {
                 showQuestion(currentQuestionIndex + 1);
             } else {
