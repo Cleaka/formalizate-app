@@ -733,20 +733,23 @@
                             qOptions.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
                             btn.classList.add('selected');
                             
-                            // --- LÓGICA DE AVANCE/FINALIZACIÓN CORREGIDA (de la respuesta anterior) ---
+                            // Lógica de avance automático para opciones
                             if (currentQuestionIndex === totalQuestions - 1) {
-                                // Es la última pregunta, terminar y mostrar el resultado.
                                 setTimeout(evaluateAnswers, 200); 
                             } else {
-                                // No es la última, avanzar a la siguiente pregunta.
                                 setTimeout(nextQuestion, 200);
                             }
-                            // ------------------------------------------------
                         };
                         qOptions.appendChild(btn);
                     });
                     break;
                 case 'number':
+                    // --- AJUSTE CLAVE 1: Inicializar la respuesta si no existe ---
+                    if (savedAnswer === undefined) {
+                        userData.answers[question.id] = ''; 
+                    }
+                    // -----------------------------------------------------------
+
                     const inputNum = document.createElement('input');
                     inputNum.type = 'number';
                     inputNum.placeholder = '0.0';
@@ -754,7 +757,7 @@
                     inputNum.min = '0';
                     inputNum.value = (savedAnswer && savedAnswer !== 'N/A') ? savedAnswer : '';
                     
-                    // --- CORRECCIÓN: Usar 'input' en lugar de 'onchange' para guardar el valor inmediatamente ---
+                    // Usar 'input' para guardar el valor inmediatamente
                     inputNum.oninput = () => { 
                         userData.answers[question.id] = inputNum.value;
                     };
@@ -762,9 +765,17 @@
                     qOptions.appendChild(inputNum);
                     break;
                 case 'dimensions':
+                    // --- AJUSTE CLAVE 2: Inicializar la respuesta si no existe ---
+                    if (savedAnswer === undefined) {
+                        userData.answers[question.id] = {largo: '', ancho: ''}; 
+                    }
+                    // -----------------------------------------------------------
+                    
                     qOptions.className = 'dimensions-grid';
-                    const savedLargo = (savedAnswer && savedAnswer.largo) ? savedAnswer.largo : '';
-                    const savedAncho = (savedAnswer && savedAnswer.ancho) ? savedAnswer.ancho : '';
+                    const currentAnswer = userData.answers[question.id]; // Usamos la respuesta recién inicializada o la guardada
+                    const savedLargo = currentAnswer.largo || '';
+                    const savedAncho = currentAnswer.ancho || '';
+
 
                     qOptions.innerHTML = `
                         <label for="dim-largo">Largo (m):</label>
@@ -776,7 +787,7 @@
                     const largoInput = document.getElementById('dim-largo');
                     const anchoInput = document.getElementById('dim-ancho');
                     
-                    // --- CORRECCIÓN: Usar 'input' en lugar de 'change' para guardar el valor inmediatamente ---
+                    // Usar 'input' para guardar el valor inmediatamente
                     largoInput.addEventListener('input', () => { 
                         if (!userData.answers[question.id]) {
                             userData.answers[question.id] = {};
@@ -784,7 +795,7 @@
                         userData.answers[question.id].largo = largoInput.value;
                     });
                     
-                    // --- CORRECCIÓN: Usar 'input' en lugar de 'change' para guardar el valor inmediatamente ---
+                    // Usar 'input' para guardar el valor inmediatamente
                     anchoInput.addEventListener('input', () => { 
                         if (!userData.answers[question.id]) {
                             userData.answers[question.id] = {};
@@ -810,16 +821,6 @@
             const question = currentQuestionSet[currentQuestionIndex];
             let answer = userData.answers[question.id];
             
-            // --- NUEVO: LIMPIEZA INICIAL DE LA RESPUESTA ---
-            // Asegura que answer no sea undefined/null para tipos numéricos si el campo está vacío.
-            if (question.type === 'number' && (answer === undefined || answer === null || answer === '')) {
-                answer = ''; // Lo tratamos como string vacío
-            }
-            if (question.type === 'dimensions' && (answer === undefined || answer === null)) {
-                answer = {largo: '', ancho: ''};
-            }
-            // ------------------------------------------------
-         
             // Validar según el tipo de pregunta
             let isValid = true;
             
@@ -827,17 +828,21 @@
                 isValid = answer !== undefined && answer !== '';
             } else if (question.type === 'number') {
                 const num = parseFloat(answer);
-                // La respuesta debe existir Y ser un número válido Y ser no-negativo.
-                // answer.trim() se usa para que no considere válido solo el string vacío.
+                // Validamos que NO esté vacío Y que sea un número válido Y no-negativo.
                 isValid = answer !== '' && !isNaN(num) && num >= 0;
                 
             } else if (question.type === 'dimensions') {
                 
+                // Si answer es undefined (lo cual no debería pasar con el fix en showQuestion), lo inicializamos
+                if (!answer) {
+                    answer = {largo: '', ancho: ''};
+                }
+
                 const largoNum = parseFloat(answer.largo);
                 const anchoNum = parseFloat(answer.ancho);
                 
                 // Se valida que ambos campos NO estén vacíos, sean números válidos y no negativos.
-                isValid = answer.largo !== '' &&
+                isValid = answer.largo !== '' && 
                           answer.ancho !== '' &&
                           !isNaN(largoNum) && largoNum >= 0 &&
                           !isNaN(anchoNum) && anchoNum >= 0;
@@ -847,7 +852,7 @@
                 alert('Por favor, responde la pregunta correctamente.');
                 return;
             }
-         
+
             if (currentQuestionIndex < totalQuestions - 1) {
                 showQuestion(currentQuestionIndex + 1);
             } else {
@@ -905,8 +910,9 @@
                     
                     case '2': // Con Techo
                     case '3': // Sin Techo (Lógica de capacidad es la misma)
-                        const totalLargo = parseFloat(answers.storage_dimensions.largo);
-                        const totalAncho = parseFloat(answers.storage_dimensions.ancho);
+                        // Limpieza de datos antes de usar (por si acaso)
+                        const totalLargo = parseFloat(answers.storage_dimensions.largo || 0);
+                        const totalAncho = parseFloat(answers.storage_dimensions.ancho || 0);
                         
                         const usableLargo = totalLargo - (WALL_CLEARANCE * 2);
                         const usableAncho = totalAncho - (WALL_CLEARANCE * 2);
