@@ -147,6 +147,11 @@
             background-color: #2980b9;
         }
         
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
         .btn-success {
             background-color: var(--success);
         }
@@ -263,6 +268,7 @@
                 <input type="text" id="dni" placeholder="Número de DNI" maxlength="8">
             </div>
             <button class="btn" id="saveDni">Guardar DNI</button>
+            <div id="dniMessage" style="margin-top: 10px; display: none;"></div>
         </div>
         
         <div class="card">
@@ -305,7 +311,7 @@
                     <!-- Las preguntas se cargarán dinámicamente según la opción seleccionada -->
                 </div>
                 <button class="btn" id="prev2">Anterior</button>
-                <button class="btn" id="next2">Siguiente</button>
+                <button class="btn" id="next2">Evaluar</button>
             </div>
             
             <!-- Paso 3: Resultados y recomendaciones -->
@@ -345,6 +351,7 @@
         const progressBar = document.getElementById('progress');
         const dniInput = document.getElementById('dni');
         const saveDniBtn = document.getElementById('saveDni');
+        const dniMessage = document.getElementById('dniMessage');
         const optionCards = document.querySelectorAll('.option-card');
         const next1Btn = document.getElementById('next1');
         const prev2Btn = document.getElementById('prev2');
@@ -366,10 +373,11 @@
                     type: 'textarea',
                     critical: true,
                     condition: (answer) => {
+                        if (!answer) return false;
                         const dangerousBusinesses = ['soldadura', 'taller', 'reparación', 'fabricación'];
                         return !dangerousBusinesses.some(business => answer.toLowerCase().includes(business));
                     },
-                    failureMessage: 'No puede ubicarse cerca de negocios que generen chispas o temperaturas peligrosas.'
+                    failureMessage: 'No puede ubicarse cerca de negocios que generen chispas o temperaturas peligrosas (soldadura, talleres, etc.).'
                 },
                 {
                     id: 'ventilation_size',
@@ -381,11 +389,11 @@
                 },
                 {
                     id: 'ventilation_type',
-                    text: '¿La ventilación es permanente? (No debe tener ventana, puede ser rejas)',
+                    text: '¿La ventilación es permanente?',
                     type: 'select',
-                    options: ['Sí, es permanente', 'No, no es permanente'],
+                    options: ['Sí, es permanente (rejas)', 'No, no es permanente (tiene ventana)'],
                     critical: true,
-                    condition: (answer) => answer === 'Sí, es permanente',
+                    condition: (answer) => answer === 'Sí, es permanente (rejas)',
                     failureMessage: 'La ventilación debe ser permanente (rejas, no ventanas).'
                 },
                 {
@@ -402,10 +410,11 @@
                     type: 'text',
                     critical: true,
                     condition: (answer) => {
+                        if (!answer) return false;
                         const flammableMaterials = ['estera', 'paja', 'madera', 'cartón', 'plástico'];
                         return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
                     },
-                    failureMessage: 'El techo no debe ser de material inflamable.'
+                    failureMessage: 'El techo no debe ser de material inflamable (estera, paja, madera, cartón, plástico).'
                 },
                 {
                     id: 'floor_material',
@@ -413,10 +422,11 @@
                     type: 'text',
                     critical: true,
                     condition: (answer) => {
+                        if (!answer) return false;
                         const flammableMaterials = ['madera', 'cartón', 'plástico'];
                         return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
                     },
-                    failureMessage: 'El piso no debe ser de material inflamable.'
+                    failureMessage: 'El piso no debe ser de material inflamable (madera, cartón, plástico).'
                 },
                 {
                     id: 'wall_material',
@@ -424,10 +434,11 @@
                     type: 'text',
                     critical: true,
                     condition: (answer) => {
+                        if (!answer) return false;
                         const flammableMaterials = ['madera', 'cartón', 'plástico', 'estera'];
                         return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
                     },
-                    failureMessage: 'Las paredes no deben ser de material inflamable.'
+                    failureMessage: 'Las paredes no deben ser de material inflamable (madera, cartón, plástico, estera).'
                 }
             ],
             2: [
@@ -437,10 +448,11 @@
                     type: 'textarea',
                     critical: true,
                     condition: (answer) => {
+                        if (!answer) return false;
                         const dangerousBusinesses = ['soldadura', 'taller', 'reparación', 'fabricación'];
                         return !dangerousBusinesses.some(business => answer.toLowerCase().includes(business));
                     },
-                    failureMessage: 'No puede ubicarse cerca de negocios que generen chispas o temperaturas peligrosas.'
+                    failureMessage: 'No puede ubicarse cerca de negocios que generen chispas o temperaturas peligrosas (soldadura, talleres, etc.).'
                 },
                 {
                     id: 'transformer_distance',
@@ -474,10 +486,11 @@
                     type: 'text',
                     critical: true,
                     condition: (answer) => {
+                        if (!answer) return false;
                         const flammableMaterials = ['estera', 'paja', 'madera', 'cartón', 'plástico'];
                         return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
                     },
-                    failureMessage: 'El techo no debe ser de material inflamable.'
+                    failureMessage: 'El techo no debe ser de material inflamable (estera, paja, madera, cartón, plástico).'
                 },
                 {
                     id: 'floor_material',
@@ -485,10 +498,11 @@
                     type: 'text',
                     critical: true,
                     condition: (answer) => {
+                        if (!answer) return false;
                         const flammableMaterials = ['madera', 'cartón', 'plástico'];
                         return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
                     },
-                    failureMessage: 'El piso no debe ser de material inflamable.'
+                    failureMessage: 'El piso no debe ser de material inflamable (madera, cartón, plástico).'
                 },
                 {
                     id: 'wall_material',
@@ -496,10 +510,11 @@
                     type: 'text',
                     critical: true,
                     condition: (answer) => {
+                        if (!answer) return false;
                         const flammableMaterials = ['madera', 'cartón', 'plástico', 'estera'];
                         return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
                     },
-                    failureMessage: 'Las paredes no deben ser de material inflamable.'
+                    failureMessage: 'Las paredes no deben ser de material inflamable (madera, cartón, plástico, estera).'
                 }
             ],
             3: [
@@ -516,30 +531,39 @@
         };
 
         // Event Listeners
-        saveDniBtn.addEventListener('click', saveDni);
-        optionCards.forEach(card => {
-            card.addEventListener('click', selectOption);
+        document.addEventListener('DOMContentLoaded', function() {
+            saveDniBtn.addEventListener('click', saveDni);
+            
+            optionCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    selectOption(this);
+                });
+            });
+            
+            next1Btn.addEventListener('click', goToStep2);
+            prev2Btn.addEventListener('click', goToStep1);
+            next2Btn.addEventListener('click', evaluateAnswers);
+            prev3Btn.addEventListener('click', goToStep2);
+            restartBtn.addEventListener('click', restartEvaluation);
+            printDeclarationBtn.addEventListener('click', printDeclaration);
         });
-        next1Btn.addEventListener('click', goToStep2);
-        prev2Btn.addEventListener('click', goToStep1);
-        next2Btn.addEventListener('click', evaluateAnswers);
-        prev3Btn.addEventListener('click', goToStep2);
-        restartBtn.addEventListener('click', restartEvaluation);
-        printDeclarationBtn.addEventListener('click', printDeclaration);
 
         // Funciones
         function saveDni() {
             const dni = dniInput.value.trim();
             if (dni.length === 8 && !isNaN(dni)) {
                 userData.dni = dni;
-                alert('DNI guardado correctamente. Puede continuar con la evaluación.');
+                dniMessage.textContent = '✓ DNI guardado correctamente. Puede continuar con la evaluación.';
+                dniMessage.style.color = 'green';
+                dniMessage.style.display = 'block';
             } else {
-                alert('Por favor, ingrese un DNI válido (8 dígitos).');
+                dniMessage.textContent = 'Por favor, ingrese un DNI válido (8 dígitos).';
+                dniMessage.style.color = 'red';
+                dniMessage.style.display = 'block';
             }
         }
 
-        function selectOption(e) {
-            const card = e.currentTarget;
+        function selectOption(card) {
             optionCards.forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             selectedOption = card.getAttribute('data-option');
@@ -565,12 +589,6 @@
             showStep(1);
         }
 
-        function goToStep2() {
-            currentStep = 2;
-            updateProgress();
-            showStep(2);
-        }
-
         function loadQuestions() {
             questionsContainer.innerHTML = '';
             const optionQuestions = questions[selectedOption];
@@ -586,6 +604,14 @@
                 let input;
                 if (question.type === 'select') {
                     input = document.createElement('select');
+                    // Agregar opción por defecto
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = '-- Seleccione una opción --';
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    input.appendChild(defaultOption);
+                    
                     question.options.forEach(option => {
                         const optionElement = document.createElement('option');
                         optionElement.value = option;
@@ -595,12 +621,15 @@
                 } else if (question.type === 'textarea') {
                     input = document.createElement('textarea');
                     input.rows = 3;
+                    input.placeholder = 'Describa los negocios alrededor...';
                 } else {
                     input = document.createElement('input');
                     input.type = question.type;
+                    input.placeholder = question.type === 'number' ? 'Ingrese el número...' : 'Ingrese el material...';
                 }
                 
                 input.id = question.id;
+                input.required = true;
                 questionDiv.appendChild(input);
                 questionsContainer.appendChild(questionDiv);
             });
@@ -611,20 +640,34 @@
             userData.answers = {};
             userData.recommendations = [];
             let allCriticalPassed = true;
+            let allQuestionsAnswered = true;
             
+            // Verificar que todas las preguntas estén respondidas
             optionQuestions.forEach(question => {
                 const input = document.getElementById(question.id);
                 const answer = input.value.trim();
-                userData.answers[question.id] = answer;
                 
-                if (question.critical && !question.condition(answer)) {
-                    allCriticalPassed = false;
-                    userData.recommendations.push({
-                        message: question.failureMessage,
-                        critical: true
-                    });
+                if (!answer) {
+                    allQuestionsAnswered = false;
+                    input.style.borderColor = 'red';
+                } else {
+                    input.style.borderColor = '';
+                    userData.answers[question.id] = answer;
+                    
+                    if (question.critical && !question.condition(answer)) {
+                        allCriticalPassed = false;
+                        userData.recommendations.push({
+                            message: question.failureMessage,
+                            critical: true
+                        });
+                    }
                 }
             });
+            
+            if (!allQuestionsAnswered) {
+                alert('Por favor, responda todas las preguntas antes de continuar.');
+                return;
+            }
             
             currentStep = 3;
             updateProgress();
@@ -651,6 +694,7 @@
                 warningDiv.innerHTML = `
                     <h3>Se detectaron problemas</h3>
                     <p>Su espacio de almacenamiento no cumple con algunos requisitos críticos.</p>
+                    <p><strong>Requisitos insubsanables:</strong> La solicitud no puede proceder en su casa actual.</p>
                 `;
                 resultContainer.appendChild(warningDiv);
                 
@@ -672,9 +716,10 @@
             generateDeclaration();
             declaration.classList.remove('hidden');
             
-            // Guardar datos (simulación)
+            // Guardar datos en localStorage
             if (userData.dni) {
                 localStorage.setItem(`evaluacion_${userData.dni}`, JSON.stringify(userData));
+                console.log('Datos guardados para DNI:', userData.dni);
             }
         }
 
@@ -682,7 +727,7 @@
             const fecha = new Date().toLocaleDateString('es-PE');
             let contenido = `
                 <p><strong>DECLARACIÓN JURADA</strong></p>
-                <p>Yo, con DNI N° ${userData.dni}, declaro bajo juramento que la información proporcionada en esta evaluación es veraz y corresponde a la realidad de mi espacio de almacenamiento.</p>
+                <p>Yo, con DNI N° ${userData.dni || 'No registrado'}, declaro bajo juramento que la información proporcionada en esta evaluación es veraz y corresponde a la realidad de mi espacio de almacenamiento.</p>
                 <p><strong>Fecha:</strong> ${fecha}</p>
                 <p><strong>Tipo de almacenamiento seleccionado:</strong> ${getOptionName(userData.option)}</p>
                 <p><strong>Resultado de la evaluación:</strong> ${userData.result}</p>
@@ -754,6 +799,7 @@
             optionCards.forEach(card => card.classList.remove('selected'));
             next1Btn.disabled = true;
             declaration.classList.add('hidden');
+            questionsContainer.innerHTML = '';
             
             updateProgress();
             showStep(1);
