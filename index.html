@@ -558,7 +558,7 @@
                     helpText: `¡Importante! La norma exige 4.6 metros de espacio libre entre los balones y cualquier pared. Esto significa que tu área debe tener un LARGO y ANCHO total de al menos ${MINDIMENSIONTOTAL} metros (9.2m) cada uno.`,
                     critical: true,
                     condition: (answer) => parseFloat(answer.largo) >= MINDIMENSIONTOTAL && parseFloat(answer.ancho) >= MINDIMENSIONTOTAL,
-                    failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu área debe medir al menos ${MINDIMENSIONTOTAL} x ${MINDIMENSIONTOTAL} metros.`
+                    failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu área debe medir al menos ${MINDIMECTIONTOTAL} x ${MINDIMENSIONTOTAL} metros.`
                 }
             ]
         };
@@ -694,15 +694,11 @@
                 const dependency = question.dependsOn;
                 const dependencyAnswer = userData.answers[dependency.id];
                 
+                // Si la dependencia no se cumple, saltar esta pregunta
                 if (dependencyAnswer !== dependency.value) {
-                    // Saltar esta pregunta y pasar a la siguiente
                     userData.answers[question.id] = 'N/A (Saltada)';
-                    const nextIndex = index + 1;
-                    if (nextIndex < totalQuestions) {
-                        showQuestion(nextIndex);
-                    } else {
-                        evaluateAnswers();
-                    }
+                    // Mostrar la siguiente pregunta
+                    showQuestion(index + 1);
                     return;
                 }
             }
@@ -798,23 +794,45 @@
                         userData.answers[question.id] = { largo: '', ancho: '' };
                     }
                     
-                    qOptions.innerHTML = `
-                        <label for="dim-largo-${question.id}">Largo (m):</label>
-                        <input type="number" id="dim-largo-${question.id}" placeholder="Ej: 10.0" step="0.1" min="0" value="${userData.answers[question.id].largo || ''}">
-                        <label for="dim-ancho-${question.id}">Ancho (m):</label>
-                        <input type="number" id="dim-ancho-${question.id}" placeholder="Ej: 10.0" step="0.1" min="0" value="${userData.answers[question.id].ancho || ''}">
-                    `;
+                    // Crear elementos de forma dinámica
+                    const labelLargo = document.createElement('label');
+                    labelLargo.setAttribute('for', `dim-largo-${question.id}`);
+                    labelLargo.textContent = 'Largo (m):';
                     
-                    const largoInput = document.getElementById(`dim-largo-${question.id}`);
-                    const anchoInput = document.getElementById(`dim-ancho-${question.id}`);
+                    const inputLargo = document.createElement('input');
+                    inputLargo.type = 'number';
+                    inputLargo.id = `dim-largo-${question.id}`;
+                    inputLargo.placeholder = 'Ej: 10.0';
+                    inputLargo.step = '0.1';
+                    inputLargo.min = '0';
+                    inputLargo.value = userData.answers[question.id].largo || '';
                     
-                    largoInput.addEventListener('input', function() {
+                    const labelAncho = document.createElement('label');
+                    labelAncho.setAttribute('for', `dim-ancho-${question.id}`);
+                    labelAncho.textContent = 'Ancho (m):';
+                    
+                    const inputAncho = document.createElement('input');
+                    inputAncho.type = 'number';
+                    inputAncho.id = `dim-ancho-${question.id}`;
+                    inputAncho.placeholder = 'Ej: 10.0';
+                    inputAncho.step = '0.1';
+                    inputAncho.min = '0';
+                    inputAncho.value = userData.answers[question.id].ancho || '';
+                    
+                    // Adjuntar eventos
+                    inputLargo.addEventListener('input', function() {
                         userData.answers[question.id].largo = this.value;
                     });
                     
-                    anchoInput.addEventListener('input', function() {
+                    inputAncho.addEventListener('input', function() {
                         userData.answers[question.id].ancho = this.value;
                     });
+                    
+                    // Agregar elementos al contenedor
+                    qOptions.appendChild(labelLargo);
+                    qOptions.appendChild(inputLargo);
+                    qOptions.appendChild(labelAncho);
+                    qOptions.appendChild(inputAncho);
                     break;
             }
             
@@ -841,6 +859,7 @@
                 errorMessage = 'Por favor, selecciona una respuesta.';
             } 
             else if (question.type === 'number') {
+                // Para número, validar que sea un número válido y mayor o igual a 0
                 const numValue = parseFloat(answer);
                 isValid = !isNaN(numValue) && numValue >= 0;
                 errorMessage = 'Por favor, ingresa un número válido mayor o igual a 0.';
@@ -850,6 +869,7 @@
                 const largo = parseFloat(dims.largo);
                 const ancho = parseFloat(dims.ancho);
                 
+                // Validar que ambos campos tengan valores válidos y mayores a 0
                 isValid = !isNaN(largo) && largo > 0 && !isNaN(ancho) && ancho > 0;
                 errorMessage = 'Por favor, ingresa valores válidos para largo y ancho (mayores a 0).';
             }
