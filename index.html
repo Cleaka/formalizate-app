@@ -1,819 +1,284 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formalízate - Evaluación de Almacenamiento</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --light: #ecf0f1;
-            --dark: #34495e;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            background-color: var(--primary);
-            color: white;
-            padding: 20px 0;
-            text-align: center;
-            border-radius: 8px 8px 0 0;
-            margin-bottom: 20px;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .step {
-            display: none;
-        }
-        
-        .step.active {
-            display: block;
-        }
-        
-        h2 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            border-bottom: 2px solid var(--light);
-            padding-bottom: 10px;
-        }
-        
-        .option-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .option-card {
-            border: 2px solid var(--light);
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .option-card:hover {
-            border-color: var(--secondary);
-            transform: translateY(-5px);
-        }
-        
-        .option-card.selected {
-            border-color: var(--secondary);
-            background-color: rgba(52, 152, 219, 0.1);
-        }
-        
-        .option-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-            color: var(--secondary);
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: var(--secondary);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-            margin-right: 10px;
-            margin-top: 10px;
-        }
-        
-        .btn:hover {
-            background-color: #2980b9;
-        }
-        
-        .btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        
-        .btn-success {
-            background-color: var(--success);
-        }
-        
-        .btn-success:hover {
-            background-color: #219653;
-        }
-        
-        .btn-warning {
-            background-color: var(--warning);
-        }
-        
-        .btn-warning:hover {
-            background-color: #e67e22;
-        }
-        
-        .btn-danger {
-            background-color: var(--danger);
-        }
-        
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-        
-        .result {
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        
-        .success {
-            background-color: rgba(39, 174, 96, 0.1);
-            border: 1px solid var(--success);
-        }
-        
-        .warning {
-            background-color: rgba(243, 156, 18, 0.1);
-            border: 1px solid var(--warning);
-        }
-        
-        .danger {
-            background-color: rgba(231, 76, 60, 0.1);
-            border: 1px solid var(--danger);
-        }
-        
-        .recommendations {
-            margin-top: 20px;
-        }
-        
-        .recommendation-item {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--warning);
-            background-color: rgba(243, 156, 18, 0.1);
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background-color: var(--light);
-            border-radius: 5px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .progress {
-            height: 100%;
-            background-color: var(--secondary);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-        
-        .dni-section {
-            background-color: rgba(52, 152, 219, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .declaration {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        
-        @media (max-width: 600px) {
-            .option-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .btn {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formalízate OSINERGMIN - Evaluación de Almacenamiento</title>
+<style>
+:root {
+    --primary: #003366;
+    --secondary: #f1c40f;
+    --success: #27ae60;
+    --danger: #e74c3c;
+    --light: #f5f7fa;
+    --dark: #2c3e50;
+}
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--light);
+    margin: 0;
+    color: var(--dark);
+    overflow-x: hidden;
+}
+header {
+    background: linear-gradient(135deg, var(--primary), #0057b8);
+    color: white;
+    padding: 25px;
+    text-align: center;
+    border-bottom: 5px solid var(--secondary);
+}
+header .logo {
+    font-size: 28px;
+    font-weight: bold;
+}
+header .subtitle {
+    font-size: 15px;
+    opacity: 0.9;
+}
+.container {
+    max-width: 850px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    animation: fadeIn 1s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.card {
+    padding: 25px;
+}
+.progress-bar {
+    height: 10px;
+    background: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 25px 20px;
+}
+.progress {
+    height: 100%;
+    background: var(--secondary);
+    width: 0%;
+    transition: width 0.5s ease;
+}
+.option-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+.option-card {
+    background: #f9f9f9;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    text-align: center;
+    padding: 20px;
+    flex: 1 1 250px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.option-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--secondary);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.option-card.selected {
+    border-color: var(--secondary);
+    background: #fffbe6;
+}
+.option-icon {
+    font-size: 40px;
+    color: var(--primary);
+}
+.btn {
+    background-color: var(--primary);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    margin: 10px 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.btn:hover {
+    background-color: #004080;
+}
+.btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+.step {
+    display: none;
+}
+.step.active {
+    display: block;
+}
+.result {
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+.result.success {
+    background: #e8f8ec;
+    border: 2px solid var(--success);
+    color: var(--success);
+}
+.result.warning {
+    background: #fff4e6;
+    border: 2px solid #f39c12;
+    color: #f39c12;
+}
+.recommendation-item {
+    background: #fff4e6;
+    border-left: 5px solid #f39c12;
+    padding: 10px;
+    margin: 8px 0;
+}
+select, input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+}
+label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+footer {
+    background: var(--primary);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">FORMALÍZATE</div>
-            <div class="subtitle">Evaluación de condiciones para almacenamiento de balones</div>
-        </header>
-        
-        <div class="dni-section card">
-            <h2>Identificación</h2>
-            <div class="form-group">
-                <label for="dni">Ingresa tu DNI:</label>
-                <input type="text" id="dni" placeholder="Número de DNI" maxlength="8">
-            </div>
-            <button class="btn" id="saveDni">Guardar DNI</button>
-            <div id="dniMessage" style="margin-top: 10px; display: none;"></div>
+<header>
+    <div class="logo">🟦 OSINERGMIN - Formalízate</div>
+    <div class="subtitle">Evaluación para almacenamiento de balones de gas</div>
+</header>
+
+<div class="container">
+    <div class="progress-bar"><div class="progress" id="progress"></div></div>
+    <div class="card step active" id="step1">
+        <h2>1️⃣ ¿Dónde desea almacenar los balones?</h2>
+        <div class="option-grid">
+            <div class="option-card" data-option="1"><div class="option-icon">🏠</div><h3>Espacio con techo</h3></div>
+            <div class="option-card" data-option="2"><div class="option-icon">🌤️</div><h3>Sin techo</h3></div>
+            <div class="option-card" data-option="3"><div class="option-icon">🛒</div><h3>En rack</h3></div>
         </div>
-        
-        <div class="card">
-            <div class="progress-bar">
-                <div class="progress" id="progress"></div>
-            </div>
-            
-            <!-- Paso 1: Selección de tipo de almacenamiento -->
-            <div class="step active" id="step1">
-                <h2>¿En dónde quiere almacenar los balones?</h2>
-                <p>Selecciona una opción según tu situación:</p>
-                
-                <div class="option-grid">
-                    <div class="option-card" data-option="1">
-                        <div class="option-icon">🏠</div>
-                        <h3>Espacio con techo</h3>
-                        <p>Área cubierta para almacenamiento</p>
-                    </div>
-                    
-                    <div class="option-card" data-option="2">
-                        <div class="option-icon">🌤️</div>
-                        <h3>Sin techo</h3>
-                        <p>Área descubierta para almacenamiento</p>
-                    </div>
-                    
-                    <div class="option-card" data-option="3">
-                        <div class="option-icon">🛒</div>
-                        <h3>En rack</h3>
-                        <p>Estructura especial para exhibición</p>
-                    </div>
-                </div>
-                
-                <button class="btn" id="next1" disabled>Siguiente</button>
-            </div>
-            
-            <!-- Paso 2: Preguntas según la opción seleccionada -->
-            <div class="step" id="step2">
-                <h2>Evaluación de condiciones</h2>
-                <div id="questions-container">
-                    <!-- Las preguntas se cargarán dinámicamente según la opción seleccionada -->
-                </div>
-                <button class="btn" id="prev2">Anterior</button>
-                <button class="btn" id="next2">Evaluar</button>
-            </div>
-            
-            <!-- Paso 3: Resultados y recomendaciones -->
-            <div class="step" id="step3">
-                <h2>Resultado de la evaluación</h2>
-                <div id="result-container">
-                    <!-- Los resultados se mostrarán aquí -->
-                </div>
-                <button class="btn" id="prev3">Anterior</button>
-                <button class="btn" id="restart">Realizar otra evaluación</button>
-            </div>
-        </div>
-        
-        <div class="declaration hidden" id="declaration">
-            <h2>Declaración Jurada</h2>
-            <div id="declaration-content">
-                <!-- El contenido de la declaración jurada se generará aquí -->
-            </div>
-            <button class="btn" id="printDeclaration">Imprimir Declaración</button>
-        </div>
+        <button class="btn" id="next1" disabled>Siguiente ➡️</button>
     </div>
 
-    <script>
-        // Variables globales
-        let currentStep = 1;
-        let selectedOption = null;
-        let userData = {
-            dni: '',
-            option: '',
-            answers: {},
-            result: '',
-            recommendations: []
-        };
+    <div class="card step" id="step2">
+        <h2>2️⃣ Evaluación de condiciones</h2>
+        <div id="questions-container"></div>
+        <button class="btn" id="prev2">⬅️ Atrás</button>
+        <button class="btn" id="next2">Evaluar ✅</button>
+    </div>
 
-        // Elementos DOM
-        const steps = document.querySelectorAll('.step');
-        const progressBar = document.getElementById('progress');
-        const dniInput = document.getElementById('dni');
-        const saveDniBtn = document.getElementById('saveDni');
-        const dniMessage = document.getElementById('dniMessage');
-        const optionCards = document.querySelectorAll('.option-card');
-        const next1Btn = document.getElementById('next1');
-        const prev2Btn = document.getElementById('prev2');
-        const next2Btn = document.getElementById('next2');
-        const prev3Btn = document.getElementById('prev3');
-        const restartBtn = document.getElementById('restart');
-        const questionsContainer = document.getElementById('questions-container');
-        const resultContainer = document.getElementById('result-container');
-        const declaration = document.getElementById('declaration');
-        const declarationContent = document.getElementById('declaration-content');
-        const printDeclarationBtn = document.getElementById('printDeclaration');
+    <div class="card step" id="step3">
+        <h2>3️⃣ Resultado</h2>
+        <div id="result-container"></div>
+        <button class="btn" id="restart">🔁 Nueva evaluación</button>
+    </div>
+</div>
 
-        // Preguntas según cada opción
-        const questions = {
-            1: [
-                {
-                    id: 'businesses',
-                    text: '¿Qué negocios rodean su vivienda (costados)?',
-                    type: 'textarea',
-                    critical: true,
-                    condition: (answer) => {
-                        if (!answer) return false;
-                        const dangerousBusinesses = ['soldadura', 'taller', 'reparación', 'fabricación'];
-                        return !dangerousBusinesses.some(business => answer.toLowerCase().includes(business));
-                    },
-                    failureMessage: 'No puede ubicarse cerca de negocios que generen chispas o temperaturas peligrosas (soldadura, talleres, etc.).'
-                },
-                {
-                    id: 'ventilation_size',
-                    text: '¿En el espacio de almacenamiento qué tamaño tiene la ventilación (en metros cuadrados)?',
-                    type: 'number',
-                    critical: true,
-                    condition: (answer) => parseFloat(answer) >= 6,
-                    failureMessage: 'La ventilación debe tener al menos 6 metros cuadrados.'
-                },
-                {
-                    id: 'ventilation_type',
-                    text: '¿La ventilación es permanente?',
-                    type: 'select',
-                    options: ['Sí, es permanente (rejas)', 'No, no es permanente (tiene ventana)'],
-                    critical: true,
-                    condition: (answer) => answer === 'Sí, es permanente (rejas)',
-                    failureMessage: 'La ventilación debe ser permanente (rejas, no ventanas).'
-                },
-                {
-                    id: 'transformer_distance',
-                    text: '¿Cuántos metros hay hasta el transformador eléctrico más cercano?',
-                    type: 'number',
-                    critical: true,
-                    condition: (answer) => parseFloat(answer) >= 7.6,
-                    failureMessage: 'Debe haber al menos 7.6 metros de distancia al transformador eléctrico.'
-                },
-                {
-                    id: 'roof_material',
-                    text: '¿Qué material es su techo en el espacio de almacenamiento?',
-                    type: 'text',
-                    critical: true,
-                    condition: (answer) => {
-                        if (!answer) return false;
-                        const flammableMaterials = ['estera', 'paja', 'madera', 'cartón', 'plástico'];
-                        return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
-                    },
-                    failureMessage: 'El techo no debe ser de material inflamable (estera, paja, madera, cartón, plástico).'
-                },
-                {
-                    id: 'floor_material',
-                    text: '¿Qué material es su piso en el espacio de almacenamiento?',
-                    type: 'text',
-                    critical: true,
-                    condition: (answer) => {
-                        if (!answer) return false;
-                        const flammableMaterials = ['madera', 'cartón', 'plástico'];
-                        return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
-                    },
-                    failureMessage: 'El piso no debe ser de material inflamable (madera, cartón, plástico).'
-                },
-                {
-                    id: 'wall_material',
-                    text: '¿Qué material son sus paredes en el espacio de almacenamiento?',
-                    type: 'text',
-                    critical: true,
-                    condition: (answer) => {
-                        if (!answer) return false;
-                        const flammableMaterials = ['madera', 'cartón', 'plástico', 'estera'];
-                        return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
-                    },
-                    failureMessage: 'Las paredes no deben ser de material inflamable (madera, cartón, plástico, estera).'
-                }
-            ],
-            2: [
-                {
-                    id: 'businesses',
-                    text: '¿Qué negocios rodean su vivienda (costados)?',
-                    type: 'textarea',
-                    critical: true,
-                    condition: (answer) => {
-                        if (!answer) return false;
-                        const dangerousBusinesses = ['soldadura', 'taller', 'reparación', 'fabricación'];
-                        return !dangerousBusinesses.some(business => answer.toLowerCase().includes(business));
-                    },
-                    failureMessage: 'No puede ubicarse cerca de negocios que generen chispas o temperaturas peligrosas (soldadura, talleres, etc.).'
-                },
-                {
-                    id: 'transformer_distance',
-                    text: '¿Cuántos metros hay hasta el transformador eléctrico más cercano?',
-                    type: 'number',
-                    critical: true,
-                    condition: (answer) => parseFloat(answer) >= 7.6,
-                    failureMessage: 'Debe haber al menos 7.6 metros de distancia al transformador eléctrico.'
-                },
-                {
-                    id: 'has_door',
-                    text: '¿Tiene alguna puerta?',
-                    type: 'select',
-                    options: ['Sí', 'No'],
-                    critical: true,
-                    condition: (answer) => answer === 'No',
-                    failureMessage: 'No debe tener puerta en el espacio de almacenamiento.'
-                },
-                {
-                    id: 'has_electricity',
-                    text: '¿Tiene cable eléctrico su espacio de almacenamiento?',
-                    type: 'select',
-                    options: ['Sí', 'No'],
-                    critical: true,
-                    condition: (answer) => answer === 'No',
-                    failureMessage: 'No debe tener cableado eléctrico en el espacio de almacenamiento.'
-                },
-                {
-                    id: 'roof_material',
-                    text: '¿Qué material es su techo en el espacio de almacenamiento?',
-                    type: 'text',
-                    critical: true,
-                    condition: (answer) => {
-                        if (!answer) return false;
-                        const flammableMaterials = ['estera', 'paja', 'madera', 'cartón', 'plástico'];
-                        return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
-                    },
-                    failureMessage: 'El techo no debe ser de material inflamable (estera, paja, madera, cartón, plástico).'
-                },
-                {
-                    id: 'floor_material',
-                    text: '¿Qué material es su piso en el espacio de almacenamiento?',
-                    type: 'text',
-                    critical: true,
-                    condition: (answer) => {
-                        if (!answer) return false;
-                        const flammableMaterials = ['madera', 'cartón', 'plástico'];
-                        return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
-                    },
-                    failureMessage: 'El piso no debe ser de material inflamable (madera, cartón, plástico).'
-                },
-                {
-                    id: 'wall_material',
-                    text: '¿Qué material son sus paredes en el espacio de almacenamiento?',
-                    type: 'text',
-                    critical: true,
-                    condition: (answer) => {
-                        if (!answer) return false;
-                        const flammableMaterials = ['madera', 'cartón', 'plástico', 'estera'];
-                        return !flammableMaterials.some(material => answer.toLowerCase().includes(material));
-                    },
-                    failureMessage: 'Las paredes no deben ser de material inflamable (madera, cartón, plástico, estera).'
-                }
-            ],
-            3: [
-                {
-                    id: 'has_retiro',
-                    text: '¿Tiene un espacio entre la vereda y su casa (retiro)?',
-                    type: 'select',
-                    options: ['Sí', 'No'],
-                    critical: true,
-                    condition: (answer) => answer === 'Sí',
-                    failureMessage: 'Debe tener un espacio de retiro entre la vereda y su casa.'
-                }
-            ]
-        };
+<footer>
+    © 2025 OSINERGMIN | Proyecto Formalízate
+</footer>
 
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            saveDniBtn.addEventListener('click', saveDni);
-            
-            optionCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    selectOption(this);
-                });
-            });
-            
-            next1Btn.addEventListener('click', goToStep2);
-            prev2Btn.addEventListener('click', goToStep1);
-            next2Btn.addEventListener('click', evaluateAnswers);
-            prev3Btn.addEventListener('click', goToStep2);
-            restartBtn.addEventListener('click', restartEvaluation);
-            printDeclarationBtn.addEventListener('click', printDeclaration);
-        });
+<script>
+let currentStep = 1;
+let selectedOption = null;
+const steps = document.querySelectorAll('.step');
+const optionCards = document.querySelectorAll('.option-card');
+const next1 = document.getElementById('next1');
+const prev2 = document.getElementById('prev2');
+const next2 = document.getElementById('next2');
+const restart = document.getElementById('restart');
+const progress = document.getElementById('progress');
+const resultContainer = document.getElementById('result-container');
+const questionsContainer = document.getElementById('questions-container');
 
-        // Funciones
-        function saveDni() {
-            const dni = dniInput.value.trim();
-            if (dni.length === 8 && !isNaN(dni)) {
-                userData.dni = dni;
-                dniMessage.textContent = '✓ DNI guardado correctamente. Puede continuar con la evaluación.';
-                dniMessage.style.color = 'green';
-                dniMessage.style.display = 'block';
-            } else {
-                dniMessage.textContent = 'Por favor, ingrese un DNI válido (8 dígitos).';
-                dniMessage.style.color = 'red';
-                dniMessage.style.display = 'block';
-            }
+const questions = {
+    1: [
+        { id:'vent', text:'¿Cuenta con ventilación permanente?', options:['Sí','No'], valid:'Sí' },
+        { id:'dist', text:'¿Está a más de 7.6 m de un transformador eléctrico?', options:['Sí','No'], valid:'Sí' },
+        { id:'techo', text:'Material del techo', options:['Concreto','Metal','Madera','Plástico'], valid:['Concreto','Metal'] }
+    ],
+    2: [
+        { id:'dist', text:'¿Está a más de 7.6 m del transformador?', options:['Sí','No'], valid:'Sí' },
+        { id:'piso', text:'Material del piso', options:['Cemento','Tierra','Madera'], valid:'Cemento' }
+    ],
+    3: [
+        { id:'retiro', text:'¿Tiene espacio de retiro entre la vereda y la casa?', options:['Sí','No'], valid:'Sí' }
+    ]
+};
+
+optionCards.forEach(card=>{
+    card.addEventListener('click',()=>{
+        optionCards.forEach(c=>c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedOption = card.dataset.option;
+        next1.disabled = false;
+    });
+});
+
+next1.onclick = ()=>goToStep(2);
+prev2 && (prev2.onclick = ()=>goToStep(1));
+next2.onclick = evaluate;
+restart.onclick = ()=>location.reload();
+
+function goToStep(n){
+    steps.forEach(s=>s.classList.remove('active'));
+    document.getElementById(`step${n}`).classList.add('active');
+    currentStep = n;
+    progress.style.width = `${(n/3)*100}%`;
+    if(n===2) loadQuestions();
+}
+
+function loadQuestions(){
+    questionsContainer.innerHTML='';
+    questions[selectedOption].forEach(q=>{
+        const div=document.createElement('div');
+        div.className='form-group';
+        div.innerHTML=`<label>${q.text}</label>`;
+        const sel=document.createElement('select');
+        sel.id=q.id;
+        sel.innerHTML='<option value="">-- Seleccione --</option>'+q.options.map(o=>`<option>${o}</option>`).join('');
+        div.appendChild(sel);
+        questionsContainer.appendChild(div);
+    });
+}
+
+function evaluate(){
+    const list = questions[selectedOption];
+    let passed=true;
+    resultContainer.innerHTML='';
+    list.forEach(q=>{
+        const val=document.getElementById(q.id).value;
+        if(!val || (Array.isArray(q.valid)?!q.valid.includes(val):val!==q.valid)){
+            passed=false;
+            const rec=document.createElement('div');
+            rec.className='recommendation-item';
+            rec.textContent=`⚠️ ${q.text} no cumple con el requisito.`;
+            resultContainer.appendChild(rec);
         }
-
-        function selectOption(card) {
-            optionCards.forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            selectedOption = card.getAttribute('data-option');
-            userData.option = selectedOption;
-            next1Btn.disabled = false;
-        }
-
-        function goToStep2() {
-            if (!selectedOption) {
-                alert('Por favor, seleccione una opción de almacenamiento.');
-                return;
-            }
-            
-            currentStep = 2;
-            updateProgress();
-            showStep(2);
-            loadQuestions();
-        }
-
-        function goToStep1() {
-            currentStep = 1;
-            updateProgress();
-            showStep(1);
-        }
-
-        function loadQuestions() {
-            questionsContainer.innerHTML = '';
-            const optionQuestions = questions[selectedOption];
-            
-            optionQuestions.forEach((question, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'form-group';
-                
-                const label = document.createElement('label');
-                label.textContent = `${index + 1}. ${question.text}`;
-                questionDiv.appendChild(label);
-                
-                let input;
-                if (question.type === 'select') {
-                    input = document.createElement('select');
-                    // Agregar opción por defecto
-                    const defaultOption = document.createElement('option');
-                    defaultOption.value = '';
-                    defaultOption.textContent = '-- Seleccione una opción --';
-                    defaultOption.disabled = true;
-                    defaultOption.selected = true;
-                    input.appendChild(defaultOption);
-                    
-                    question.options.forEach(option => {
-                        const optionElement = document.createElement('option');
-                        optionElement.value = option;
-                        optionElement.textContent = option;
-                        input.appendChild(optionElement);
-                    });
-                } else if (question.type === 'textarea') {
-                    input = document.createElement('textarea');
-                    input.rows = 3;
-                    input.placeholder = 'Describa los negocios alrededor...';
-                } else {
-                    input = document.createElement('input');
-                    input.type = question.type;
-                    input.placeholder = question.type === 'number' ? 'Ingrese el número...' : 'Ingrese el material...';
-                }
-                
-                input.id = question.id;
-                input.required = true;
-                questionDiv.appendChild(input);
-                questionsContainer.appendChild(questionDiv);
-            });
-        }
-
-        function evaluateAnswers() {
-            const optionQuestions = questions[selectedOption];
-            userData.answers = {};
-            userData.recommendations = [];
-            let allCriticalPassed = true;
-            let allQuestionsAnswered = true;
-            
-            // Verificar que todas las preguntas estén respondidas
-            optionQuestions.forEach(question => {
-                const input = document.getElementById(question.id);
-                const answer = input.value.trim();
-                
-                if (!answer) {
-                    allQuestionsAnswered = false;
-                    input.style.borderColor = 'red';
-                } else {
-                    input.style.borderColor = '';
-                    userData.answers[question.id] = answer;
-                    
-                    if (question.critical && !question.condition(answer)) {
-                        allCriticalPassed = false;
-                        userData.recommendations.push({
-                            message: question.failureMessage,
-                            critical: true
-                        });
-                    }
-                }
-            });
-            
-            if (!allQuestionsAnswered) {
-                alert('Por favor, responda todas las preguntas antes de continuar.');
-                return;
-            }
-            
-            currentStep = 3;
-            updateProgress();
-            showStep(3);
-            showResults(allCriticalPassed);
-        }
-
-        function showResults(allCriticalPassed) {
-            resultContainer.innerHTML = '';
-            
-            if (allCriticalPassed) {
-                const successDiv = document.createElement('div');
-                successDiv.className = 'result success';
-                successDiv.innerHTML = `
-                    <h3>¡Felicidades!</h3>
-                    <p>Su espacio de almacenamiento cumple con los requisitos críticos para la formalización.</p>
-                    <p>Puede acercarse a la oficina para solicitar los formatos y completar los requisitos no críticos para su negocio.</p>
-                `;
-                resultContainer.appendChild(successDiv);
-                userData.result = 'Aprobado';
-            } else {
-                const warningDiv = document.createElement('div');
-                warningDiv.className = 'result warning';
-                warningDiv.innerHTML = `
-                    <h3>Se detectaron problemas</h3>
-                    <p>Su espacio de almacenamiento no cumple con algunos requisitos críticos.</p>
-                    <p><strong>Requisitos insubsanables:</strong> La solicitud no puede proceder en su casa actual.</p>
-                `;
-                resultContainer.appendChild(warningDiv);
-                
-                const recommendationsDiv = document.createElement('div');
-                recommendationsDiv.className = 'recommendations';
-                
-                userData.recommendations.forEach(rec => {
-                    const recItem = document.createElement('div');
-                    recItem.className = 'recommendation-item';
-                    recItem.innerHTML = `<strong>Recomendación:</strong> ${rec.message}`;
-                    recommendationsDiv.appendChild(recItem);
-                });
-                
-                resultContainer.appendChild(recommendationsDiv);
-                userData.result = 'No aprobado - Requiere mejoras';
-            }
-            
-            // Mostrar declaración jurada
-            generateDeclaration();
-            declaration.classList.remove('hidden');
-            
-            // Guardar datos en localStorage
-            if (userData.dni) {
-                localStorage.setItem(`evaluacion_${userData.dni}`, JSON.stringify(userData));
-                console.log('Datos guardados para DNI:', userData.dni);
-            }
-        }
-
-        function generateDeclaration() {
-            const fecha = new Date().toLocaleDateString('es-PE');
-            let contenido = `
-                <p><strong>DECLARACIÓN JURADA</strong></p>
-                <p>Yo, con DNI N° ${userData.dni || 'No registrado'}, declaro bajo juramento que la información proporcionada en esta evaluación es veraz y corresponde a la realidad de mi espacio de almacenamiento.</p>
-                <p><strong>Fecha:</strong> ${fecha}</p>
-                <p><strong>Tipo de almacenamiento seleccionado:</strong> ${getOptionName(userData.option)}</p>
-                <p><strong>Resultado de la evaluación:</strong> ${userData.result}</p>
-                <p><strong>Respuestas proporcionadas:</strong></p>
-                <ul>
-            `;
-            
-            Object.keys(userData.answers).forEach(key => {
-                const question = questions[userData.option].find(q => q.id === key);
-                contenido += `<li><strong>${question.text}:</strong> ${userData.answers[key]}</li>`;
-            });
-            
-            contenido += `</ul>`;
-            
-            if (userData.recommendations.length > 0) {
-                contenido += `<p><strong>Recomendaciones:</strong></p><ul>`;
-                userData.recommendations.forEach(rec => {
-                    contenido += `<li>${rec.message}</li>`;
-                });
-                contenido += `</ul>`;
-            }
-            
-            declarationContent.innerHTML = contenido;
-        }
-
-        function getOptionName(option) {
-            switch(option) {
-                case '1': return 'Espacio con techo';
-                case '2': return 'Sin techo';
-                case '3': return 'En rack';
-                default: return 'No especificado';
-            }
-        }
-
-        function printDeclaration() {
-            const ventana = window.open('', '_blank');
-            ventana.document.write(`
-                <html>
-                <head>
-                    <title>Declaración Jurada - Formalízate</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        h1 { text-align: center; color: #2c3e50; }
-                        .firma { margin-top: 50px; border-top: 1px solid #000; width: 300px; text-align: center; padding-top: 10px; }
-                    </style>
-                </head>
-                <body>
-                    ${declarationContent.innerHTML}
-                    <div class="firma">Firma del declarante</div>
-                </body>
-                </html>
-            `);
-            ventana.document.close();
-            ventana.print();
-        }
-
-        function restartEvaluation() {
-            currentStep = 1;
-            selectedOption = null;
-            userData = {
-                dni: userData.dni, // Mantener el DNI
-                option: '',
-                answers: {},
-                result: '',
-                recommendations: []
-            };
-            
-            // Reset UI
-            optionCards.forEach(card => card.classList.remove('selected'));
-            next1Btn.disabled = true;
-            declaration.classList.add('hidden');
-            questionsContainer.innerHTML = '';
-            
-            updateProgress();
-            showStep(1);
-        }
-
-        function updateProgress() {
-            const progress = (currentStep / 3) * 100;
-            progressBar.style.width = `${progress}%`;
-        }
-
-        function showStep(stepNumber) {
-            steps.forEach(step => step.classList.remove('active'));
-            document.getElementById(`step${stepNumber}`).classList.add('active');
-        }
-    </script>
+    });
+    const res=document.createElement('div');
+    res.className='result '+(passed?'success':'warning');
+    res.innerHTML=passed?'<h3>✅ Cumple con los requisitos mínimos.</h3>':'<h3>⚠️ No cumple con todos los requisitos críticos.</h3>';
+    resultContainer.prepend(res);
+    goToStep(3);
+}
+</script>
 </body>
 </html>
