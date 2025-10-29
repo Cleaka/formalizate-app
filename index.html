@@ -3,274 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSINERGMIN - Asistente de Pre-evaluación para Venta de GLP</title>
+    <title>Osinergmin - Asistente de Formalización (GLP)</title>
     <style>
         :root {
             --primary: #005A9C;
-            --primary-dark: #00467a;
             --secondary: #00A9E0;
-            --accent: #FF6B00;
             --success: #27ae60;
             --warning: #f39c12;
             --danger: #e74c3c;
-            --light: #f8f9fa;
-            --dark: #343a40;
-            --gray: #6c757d;
+            --light: #ecf0f1;
+            --dark: #34495e;
             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --border-radius: 8px;
         }
-        
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: var(--font-family);
         }
-        
         body {
             background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
-            background-image: linear-gradient(to bottom, #f8f9fa, #e9ecef);
-            min-height: 100vh;
         }
-        
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
         }
-        
-        /* Header con logo oficial */
         header {
-            background: white;
-            color: var(--primary);
-            padding: 25px;
+            background: var(--primary);
+            color: white;
+            padding: 20px;
             text-align: center;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 25px;
-            border-bottom: 5px solid var(--primary);
-            position: relative;
+            border-radius: 8px 8px 0 0;
         }
-        
-        .logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
         .logo {
-            height: 80px;
-            margin-right: 15px;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
         }
-        
-        .header-text {
-            text-align: left;
-        }
-        
-        .logo-text {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: -0.5px;
-        }
-        
         .subtitle {
             font-size: 18px;
-            color: var(--gray);
-            font-weight: 500;
-            margin-top: 5px;
+            opacity: 0.9;
         }
-        
-        .regional-office {
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            font-size: 14px;
-            color: var(--gray);
-            font-style: italic;
-        }
-        
-        /* Tarjetas mejoradas */
         .card {
             background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 30px;
-            margin-bottom: 25px;
-            border-top: 4px solid var(--primary);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
         }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-        
         .step { display: none; }
         .step.active { display: block; }
-        
         h2 {
             color: var(--primary);
-            margin-bottom: 20px;
-            padding-bottom: 15px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
             text-align: center;
-            border-bottom: 2px solid #e9ecef;
-            font-weight: 600;
-            position: relative;
         }
-        
-        h2:after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 3px;
-            background-color: var(--secondary);
-        }
-        
-        /* Grid de opciones mejorado */
         .option-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-top: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
         }
-        
         .option-card {
-            border: 2px solid #e9ecef;
-            border-radius: var(--border-radius);
-            padding: 25px 15px;
+            border: 2px solid var(--light);
+            border-radius: 8px;
+            padding: 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             background: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
         }
-        
         .option-card:hover {
             border-color: var(--secondary);
-            transform: translateY(-8px);
-            box-shadow: 0 10px 20px rgba(0, 169, 224, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
-        
         .option-card.selected {
             border-color: var(--secondary);
-            background-color: rgba(0, 169, 224, 0.05);
-            box-shadow: 0 5px 15px rgba(0, 169, 224, 0.2);
+            background-color: rgba(0, 169, 224, 0.1);
         }
-        
         .option-icon {
             font-size: 48px;
-            margin-bottom: 15px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-bottom: 10px;
         }
-        
         .option-card h3 {
             color: var(--dark);
-            font-size: 1.2em;
-            margin-bottom: 8px;
-            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
         }
-        
         .option-card p {
-            font-size: 0.95em;
-            color: var(--gray);
-            font-weight: 500;
+            font-size: 0.9em;
+            color: #777;
+            font-weight: bold;
         }
-        
-        /* Preguntas mejoradas */
         #question-display {
-            min-height: 250px;
+            min-height: 200px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
-        
         .question-text {
             font-size: 1.3em;
             font-weight: 600;
             color: var(--dark);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-align: center;
-            line-height: 1.5;
         }
-        
         .help-text {
-            font-size: 1.05em;
+            font-size: 1.0em;
             color: var(--primary);
             background-color: rgba(0, 169, 224, 0.05);
             border: 1px dashed var(--secondary);
-            padding: 18px;
-            border-radius: var(--border-radius);
-            margin-top: 20px;
-            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            margin-bottom: 20px;
             font-weight: 500;
-            line-height: 1.5;
         }
-        
         .answer-options {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 15px;
+            gap: 10px;
         }
-        
         .btn-option {
             display: block;
             width: 100%;
             background-color: #fff;
             color: var(--dark);
             padding: 20px;
-            border: 2px solid #e9ecef;
-            border-radius: var(--border-radius);
+            border: 2px solid var(--light);
+            border-radius: 8px;
             cursor: pointer;
             font-size: 1.1em;
             font-weight: 600;
             text-align: center;
             transition: all 0.2s ease;
         }
-        
         .btn-option:hover {
             border-color: var(--secondary);
             background-color: rgba(0, 169, 224, 0.05);
         }
-        
         .btn-option.selected {
             border-color: var(--secondary);
             background-color: rgba(0, 169, 224, 0.1);
             color: var(--primary);
         }
-        
         .answer-options.binary {
              grid-template-columns: 1fr 1fr;
         }
-        
         .dimensions-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
         }
-        
         .dimensions-grid label {
             font-weight: bold;
             text-align: right;
             font-size: 1.2em;
-            color: var(--dark);
         }
-        
         input[type="number"] {
             font-size: 1.2em;
             text-align: center;
@@ -278,355 +174,178 @@
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            transition: border 0.3s;
         }
-        
-        input[type="number"]:focus {
-            border-color: var(--secondary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 169, 224, 0.2);
-        }
-        
-        /* Botones de navegación mejorados */
         .navigation-buttons {
             display: flex;
             justify-content: space-between;
-            margin-top: 35px;
+            margin-top: 30px;
         }
-        
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--primary);
+            display: inline-block;
+            background-color: var(--secondary);
             color: white;
-            padding: 14px 28px;
+            padding: 12px 24px;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
         }
-        
-        .btn:hover { 
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn:disabled { 
-            background-color: #cccccc; 
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .btn-prev { 
-            background-color: var(--gray); 
-        }
-        
-        .btn-prev:hover { 
-            background-color: #5a6268; 
-        }
-        
-        .btn-eval { 
-            background-color: var(--success); 
-        }
-        
-        .btn-eval:hover { 
-            background-color: #219653; 
-        }
-        
-        /* Resultados mejorados */
+        .btn:hover { background-color: #007bbd; }
+        .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .btn-prev { background-color: var(--dark); }
+        .btn-prev:hover { background-color: #4a637c; }
+        .btn-eval { background-color: var(--success); }
+        .btn-eval:hover { background-color: #219653; }
         .result {
-            padding: 30px;
-            border-radius: var(--border-radius);
-            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
             text-align: center;
         }
-        
-        .result h3 { 
-            font-size: 1.8em; 
-            margin-bottom: 15px; 
-        }
-        
-        .result-icon { 
-            font-size: 4em; 
-            margin-bottom: 20px; 
-        }
-        
+        .result h3 { font-size: 1.8em; margin-bottom: 10px; }
+        .result-icon { font-size: 4em; margin-bottom: 15px; }
         .success {
             background-color: rgba(39, 174, 96, 0.1);
             border: 2px solid var(--success);
             color: #219653;
         }
-        
         .danger {
             background-color: rgba(231, 76, 60, 0.1);
             border: 2px solid var(--danger);
             color: #c0392b;
         }
-        
         .capacity-box {
             background-color: #fff;
             border: 2px solid var(--success);
-            padding: 25px;
-            margin-top: 25px;
-            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
             text-align: left;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
         }
-        
         .capacity-box p {
             font-size: 1.1em;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
-        
         .capacity-box ul {
             text-align: left;
             margin-left: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             list-style-type: '➡️ ';
             padding-left: 10px;
         }
-        
         .capacity-box li {
             padding-left: 5px;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
-        
         .capacity-box .final-capacity {
-            font-size: 1.8em;
+            font-size: 1.6em;
             font-weight: bold;
             color: var(--primary);
             text-align: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed #ddd;
         }
-        
         .failures-list {
-            margin-top: 25px;
+            margin-top: 20px;
             text-align: left;
         }
-        
         .failure-item {
-            padding: 18px;
-            margin-bottom: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
             border-left: 5px solid var(--danger);
             background-color: rgba(231, 76, 60, 0.05);
             color: #c0392b;
             font-weight: bold;
-            border-radius: 0 var(--border-radius) var(--border-radius) 0;
         }
-        
         .recommendation-item {
-            padding: 18px;
+             padding: 15px;
             margin-top: 20px;
             border-left: 5px solid var(--warning);
             background-color: rgba(243, 156, 18, 0.1);
             color: #d35400;
             font-weight: 500;
             text-align: left;
-            border-radius: 0 var(--border-radius) var(--border-radius) 0;
         }
-        
-        /* Barra de progreso mejorada */
-        .progress-container {
-            margin-bottom: 30px;
-        }
-        
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
         .progress-bar {
-            height: 12px;
-            background-color: #e9ecef;
-            border-radius: 10px;
+            height: 10px;
+            background-color: var(--light);
+            border-radius: 5px;
+            margin-bottom: 20px;
             overflow: hidden;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
         }
-        
         .progress {
             height: 100%;
-            background: linear-gradient(to right, var(--secondary), var(--primary));
+            background-color: var(--secondary);
             width: 0%;
             transition: width 0.5s ease;
-            border-radius: 10px;
         }
-        
         .dni-section {
             background-color: rgba(0, 169, 224, 0.05);
-            padding: 25px;
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            border-left: 5px solid var(--secondary);
-        }
-        
-        .hidden { display: none; }
-        
-        .declaration {
-            margin-top: 25px;
-            padding: 25px;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            background-color: #f9f9f9;
-            box-shadow: var(--shadow);
-        }
-        
-        .form-group {
+            padding: 20px;
+            border-radius: 8px;
             margin-bottom: 20px;
         }
-        
+        .hidden { display: none; }
+        .declaration {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
         .form-group label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: bold;
-            color: var(--dark);
         }
-        
         .form-group input {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             font-size: 16px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            transition: border 0.3s;
         }
-        
-        .form-group input:focus {
-            border-color: var(--secondary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 169, 224, 0.2);
-        }
-        
         .reference-image {
             max-width: 100%;
-            border-radius: var(--border-radius);
-            margin: 20px auto;
+            border-radius: 8px;
+            margin: 15px auto;
             display: block;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             border: 1px solid #ddd;
         }
-        
         .image-caption {
             text-align: center;
             font-style: italic;
-            color: var(--gray);
-            margin-bottom: 20px;
-            font-size: 0.95em;
-        }
-        
-        /* Footer institucional */
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            color: var(--gray);
+            color: #666;
+            margin-bottom: 15px;
             font-size: 0.9em;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .footer-logo {
-            height: 40px;
-            margin-bottom: 10px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .option-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .answer-options.binary {
-                grid-template-columns: 1fr;
-            }
-            
-            .dimensions-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .dimensions-grid label {
-                text-align: left;
-            }
-            
-            .navigation-buttons {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-            
-            .header-text {
-                text-align: center;
-            }
-            
-            .regional-office {
-                position: static;
-                margin-top: 10px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="logo-container">
-                <!-- Logo oficial de Osinergmin - reemplazar con el logo real -->
-                <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="10" y="10" width="80" height="80" rx="10" fill="#005A9C"/>
-                    <circle cx="50" cy="40" r="15" fill="white"/>
-                    <path d="M35 60 L50 75 L65 60 Z" fill="white"/>
-                    <text x="50" y="90" text-anchor="middle" fill="white" font-size="12" font-weight="bold">OSINERGMIN</text>
-                </svg>
-                <div class="header-text">
-                    <div class="logo-text">OSINERGMIN</div>
-                    <div class="subtitle">Asistente de Pre-evaluación para Venta de GLP</div>
-                </div>
-            </div>
-            <div class="regional-office">Desarrollado por la Oficina Regional Pasco</div>
+            <div class="logo">🛡️ Osinergmin</div>
+            <div class="subtitle">Asistente de Pre-evaluación para Venta de GLP</div>
         </header>
 
         <div class="dni-section card">
             <h2>¡Bienvenido! 👋</h2>
-            <p style="text-align: center; margin-bottom: 25px;">Te ayudaremos a revisar si tu local cumple los requisitos de seguridad. Para guardar tu avance y usarlo en la oficina, ingresa tu DNI.</p>
+            <p style="text-align: center; margin-bottom: 20px;">Te ayudaremos a revisar si tu local cumple los requisitos de seguridad. Para guardar tu avance y usarlo en la oficina, ingresa tu DNI.</p>
             <div class="form-group">
                 <label for="dni">Ingresa tu DNI (8 dígitos):</label>
                 <input type="tel" id="dni" placeholder="Ej: 12345678" maxlength="8" pattern="[0-9]{8}">
             </div>
-            <div style="text-align: center;">
-                <button class="btn" id="saveDni">Guardar DNI y Empezar</button>
-            </div>
-            <div id="dniMessage" style="margin-top: 20px; text-align: center; font-weight: bold;"></div>
+            <button class="btn" id="saveDni">Guardar DNI y Empezar</button>
+            <div id="dniMessage" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
 
         <div class="card" id="wizard-container" style="display: none;">
-            <div class="progress-container">
-                <div class="progress-label">
-                    <span>Progreso</span>
-                    <span id="progress-percent">0%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress" id="progress"></div>
-                </div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
             </div>
 
             <div class="step active" id="step1">
@@ -662,9 +381,7 @@
             <div class="step" id="step3">
                 <h2>Resultado de la Pre-evaluación</h2>
                 <div id="result-container"></div>
-                <div style="text-align: center; margin-top: 25px;">
-                    <button class="btn" id="restart">Revisar de Nuevo</button>
-                </div>
+                <button class="btn" id="restart">Revisar de Nuevo</button>
             </div>
         </div>
 
@@ -673,22 +390,10 @@
             <p><strong>DNI:</strong> <span id="decl-dni"></span></p>
             <p>Con esta fecha, declaro que las respuestas marcadas son verdaderas y reflejan la realidad de mi local.</p>
             <div id="declaration-content"></div>
-            <div style="text-align: center; margin-top: 25px;">
-                <button class="btn" id="printDeclaration">Imprimir DJ</button>
-            </div>
+            <button class="btn" id="printDeclaration">Imprimir DJ</button>
         </div>
-        
-        <footer>
-            <svg class="footer-logo" viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg">
-                <rect x="5" y="5" width="90" height="20" rx="5" fill="#005A9C"/>
-                <text x="50" y="18" text-anchor="middle" fill="white" font-size="8" font-weight="bold">OSINERGMIN</text>
-            </svg>
-            <p>Organismo Supervisor de la Inversión en Energía y Minería</p>
-            <p>Desarrollado por la Oficina Regional Pasco</p>
-        </footer>
     </div>
 
-    <!-- El resto del código JavaScript permanece igual -->
     <script>
         // --- CONSTANTES ---
         const TRANSFORMERMINDISTANCE = 7.6;
@@ -1105,7 +810,7 @@
         let totalQuestions = 0;
 
         // --- ELEMENTOS DOM ---
-        let steps, progressBar, progressPercent, dniInput, saveDniBtn, dniMessage, wizardContainer;
+        let steps, progressBar, dniInput, saveDniBtn, dniMessage, wizardContainer;
         let optionCards, questionDisplay, nextQuestionBtn, prevQuestionBtn;
         let resultContainer, restartBtn, declaration, declDni, declarationContent, printDeclarationBtn;
 
@@ -1115,7 +820,6 @@
             // Asignamos las variables DESPUÉS de que el DOM esté listo
             steps = document.querySelectorAll('.step');
             progressBar = document.getElementById('progress');
-            progressPercent = document.getElementById('progress-percent');
             dniInput = document.getElementById('dni');
             saveDniBtn = document.getElementById('saveDni');
             dniMessage = document.getElementById('dniMessage');
@@ -1212,20 +916,19 @@
         }
 
         function updateProgress() {
-            let progressPercentValue = 0;
+            let progressPercent = 0;
             if (currentStep === 1) {
-                progressPercentValue = 5;
+                progressPercent = 5;
             } else if (currentStep === 2) {
                 if (totalQuestions === 0) {
-                    progressPercentValue = 10;
+                    progressPercent = 10;
                 } else {
-                    progressPercentValue = 10 + (currentQuestionIndex / totalQuestions) * 80;
+                    progressPercent = 10 + (currentQuestionIndex / totalQuestions) * 80;
                 }
             } else if (currentStep === 3) {
-                progressPercentValue = 100;
+                progressPercent = 100;
             }
-            progressBar.style.width = `${progressPercentValue}%`;
-            progressPercent.textContent = `${Math.round(progressPercentValue)}%`;
+            progressBar.style.width = `${progressPercent}%`;
         }
 
         // --- LÓGICA DEL ASISTENTE (PASO 2) ---
