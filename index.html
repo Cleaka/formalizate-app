@@ -308,6 +308,21 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+        .reference-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 15px auto;
+            display: block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+        }
+        .image-caption {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -446,7 +461,11 @@
                     options: ['Sí, tengo retiro', 'No, mi casa da a la vereda'],
                     critical: true,
                     condition: (answer) => answer === 'Sí, tengo retiro',
-                    failureMessage: 'Para usar un Rack (jaula), es obligatorio tener un espacio de retiro. No puede estar en la vereda.'
+                    failureMessage: 'Para usar un Rack (jaula), es obligatorio tener un espacio de retiro. No puede estar en la vereda.',
+                    referenceImage: {
+                        src: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        caption: 'Ejemplo de casa con retiro (espacio entre la puerta y la vereda)'
+                    }
                 },
                 {
                     id: 'businesses',
@@ -462,7 +481,11 @@
                     text: '¿Hay algún transformador eléctrico (ese gris en el poste) cerca?',
                     type: 'binary',
                     options: ['Sí, hay uno cerca', 'No hay ninguno cerca'],
-                    critical: false 
+                    critical: false,
+                    referenceImage: {
+                        src: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        caption: 'Transformador eléctrico típico (gris) en poste'
+                    }
                 },
                 {
                     id: 'transformer_distance',
@@ -508,7 +531,11 @@
                     text: '¿Hay algún transformador eléctrico (ese gris en el poste) cerca?',
                     type: 'binary',
                     options: ['Sí, hay uno cerca', 'No hay ninguno cerca'],
-                    critical: false 
+                    critical: false,
+                    referenceImage: {
+                        src: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        caption: 'Transformador eléctrico típico (gris) en poste'
+                    }
                 },
                 {
                     id: 'transformer_distance',
@@ -602,7 +629,11 @@
                     text: '¿Hay algún transformador eléctrico (ese gris en el poste) cerca?',
                     type: 'binary',
                     options: ['Sí, hay uno cerca', 'No hay ninguno cerca'],
-                    critical: false
+                    critical: false,
+                    referenceImage: {
+                        src: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        caption: 'Transformador eléctrico típico (gris) en poste'
+                    }
                 },
                 {
                     id: 'transformer_distance',
@@ -934,6 +965,20 @@
             qText.className = 'question-text';
             qText.textContent = question.text;
             questionDisplay.appendChild(qText);
+            
+            // Agregar imagen referencial si existe
+            if (question.referenceImage) {
+                const qImage = document.createElement('img');
+                qImage.className = 'reference-image';
+                qImage.src = question.referenceImage.src;
+                qImage.alt = question.referenceImage.caption;
+                questionDisplay.appendChild(qImage);
+                
+                const qImageCaption = document.createElement('div');
+                qImageCaption.className = 'image-caption';
+                qImageCaption.textContent = question.referenceImage.caption;
+                questionDisplay.appendChild(qImageCaption);
+            }
             
             if (question.helpText) {
                 const qHelp = document.createElement('div');
