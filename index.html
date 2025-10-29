@@ -386,8 +386,12 @@
         const PISOS_SUPERIORES_LIMIT = 300;
         const BALON_DIAMETER = 0.310; // 31cm
         const MIN_DIMENSION_TOTAL = 2; // 1m de despeje * 2
+        
+        // --- NUEVA CONSTANTE (GRUPOS Y PASILLOS) ---
+        const AISLE_WIDTH = 2; // 2 metros de pasillo
+        const GROUP_MAX_KG = 2000; // 2000 kg por grupo
 
-        // --- NUEVAS RESTRICCIONES (REEMPLAZAN 4.6m) ---
+        // --- RESTRICCIONES (REEMPLAZAN 4.6m) ---
         const wallClearanceTiers = [
             { minKg: 0, maxKg: 500, clearance: 1 },
             { minKg: 501, maxKg: 1000, clearance: 2 },
@@ -399,7 +403,7 @@
             { minKg: 20001, maxKg: 50000, clearance: 10 }
         ];
 
-        // --- NUEVA RESTRICCIÓN (AFLUENCIA PÚBLICO) ---
+        // --- RESTRICCIÓN (AFLUENCIA PÚBLICO) ---
         const publicClearanceTiers = [
             { maxKg: 500, distance: 3 },
             { maxKg: 1000, distance: 4 },
@@ -413,7 +417,6 @@
 
         // --- PREGUNTAS ---
 
-        // --- Pregunta de Afluencia de Público (para insertar) ---
         const newPublicQuestions = [
             {
                 id: 'public_nearby',
@@ -427,9 +430,9 @@
                 text: '¿A cuántos metros está el lugar de afluencia de público más cercano?',
                 type: 'number',
                 helpText: 'Mida la distancia en línea recta desde el borde de su almacén hasta el borde del otro local. Esta distancia restringirá su capacidad máxima.',
-                critical: false, // No es crítico, solo restringe la capacidad
+                critical: false, 
                 dependsOn: { id: 'public_nearby', value: 'Sí, hay uno cerca' }, 
-                condition: (answer) => true, // La validación de número la hace nextQuestion
+                condition: (answer) => true, 
                 failureMessage: ''
             }
         ];
@@ -575,7 +578,7 @@
                     id: 'storage_dimensions',
                     text: 'Ingresa las medidas TOTALES de tu almacén (en metros):',
                     type: 'dimensions',
-                    helpText: `¡Importante! La norma exige un espacio libre (despeje) entre los balones y cualquier pared. Este despeje depende de la cantidad a almacenar. Tu local debe medir al menos ${MIN_DIMENSION_TOTAL} metros (2m) de largo y ancho.`,
+                    helpText: `¡Importante! La norma exige un despeje (espacio libre) que depende de la cantidad a almacenar. Además, si almacenas más de ${GROUP_MAX_KG}kg, se requerirán pasillos adicionales de ${AISLE_WIDTH}m entre grupos, lo cual reduce más el espacio útil. Tu local debe medir al menos ${MIN_DIMENSION_TOTAL}m x ${MIN_DIMENSION_TOTAL}m.`,
                     critical: true,
                     condition: (answer) => {
                         if (!answer || typeof answer.largo === 'undefined' || typeof answer.ancho === 'undefined') return false; 
@@ -652,7 +655,7 @@
                     id: 'storage_dimensions',
                     text: 'Ingresa las medidas TOTALES de tu área de almacén (en metros):',
                     type: 'dimensions',
-                    helpText: `¡Importante! La norma exige un espacio libre (despeje) entre los balones y cualquier pared. Este despeje depende de la cantidad a almacenar. Tu área debe medir al menos ${MIN_DIMENSION_TOTAL} metros (2m) de largo y ancho.`,
+                    helpText: `¡Importante! La norma exige un despeje (espacio libre) que depende de la cantidad a almacenar. Además, si almacenas más de ${GROUP_MAX_KG}kg, se requerirán pasillos adicionales de ${AISLE_WIDTH}m entre grupos, lo cual reduce más el espacio útil. Tu área debe medir al menos ${MIN_DIMENSION_TOTAL}m x ${MIN_DIMENSION_TOTAL}m.`,
                     critical: true,
                     condition: (answer) => {
                         if (!answer || typeof answer.largo === 'undefined' || typeof answer.ancho === 'undefined') return false; 
@@ -685,22 +688,54 @@
 
         /**
          * Itera por todos los niveles de despeje para encontrar la capacidad máxima "ganadora".
+         * APLICA LA LÓGICA DE PASILLOS SI SE SUPERA GROUP_MAX_KG.
          */
         function calculateMaxCapacity(totalLargo, totalAncho) {
             let maxAchievableCapacity = 0;
             let bestClearance = 0;
+            
+            const k = (2 * 10) / (BALON_DIAMETER * BALON_DIAMETER); // Constante de capacidad por m²
+            const Wp = AISLE_WIDTH;
+            const Gmax = GROUP_MAX_KG;
 
             for (const tier of wallClearanceTiers) {
                 const clearance = tier.clearance;
                 const usableLargo = totalLargo - (clearance * 2);
                 const usableAncho = totalAncho - (clearance * 2);
 
-                const potential_capacity = calculateCapacityFromUsableSpace(usableLargo, usableAncho);
+                if (usableLargo <= 0 || usableAncho <= 0) continue;
+
+                let potential_capacity = 0;
                 
-                // La capacidad está limitada por el máximo del tier Y por el espacio
+                // 1. Calcular capacidad sin pasillos
+                const capacity_no_aisles = calculateCapacityFromUsableSpace(usableLargo, usableAncho);
+
+                // 2. Comprobar si se necesita la lógica de pasillos
+                if (capacity_no_aisles <= Gmax) {
+                    // No se necesitan pasillos, la capacidad es la calculada
+                    potential_capacity = capacity_no_aisles;
+                } else {
+                    // Sí se necesitan pasillos. Usar la fórmula algebraica para encontrar la capacidad estable.
+                    
+                    // Caso 1: Pasillos se restan del Largo (se apila a lo ancho)
+                    const k_Au_Wp_Gmax = (k * usableAncho * Wp) / Gmax;
+                    const k_Au_Lu_Wp = k * usableAncho * (usableLargo + Wp);
+                    // El + Wp es para corregir el N-1 (grupos - 1 pasillos)
+                    const capacity_largo = k_Au_Lu_Wp / (1 + k_Au_Wp_Gmax);
+
+                    // Caso 2: Pasillos se restan del Ancho (se apila a lo largo)
+                    const k_Lu_Wp_Gmax = (k * usableLargo * Wp) / Gmax;
+                    const k_Lu_Au_Wp = k * usableLargo * (usableAncho + Wp);
+                    const capacity_ancho = k_Lu_Au_Wp / (1 + k_Lu_Wp_Gmax);
+
+                    // La capacidad potencial es la mejor de las dos orientaciones
+                    potential_capacity = Math.max(capacity_largo, capacity_ancho);
+                }
+                
+                // 3. Limitar por el máximo del "tier" de despeje
                 const tier_limited_capacity = Math.min(potential_capacity, tier.maxKg);
 
-                // "El ganador": Buscamos la mayor capacidad lograda en todas las pruebas
+                // 4. "El ganador": Buscamos la mayor capacidad lograda en todas las pruebas
                 if (tier_limited_capacity > maxAchievableCapacity) {
                     maxAchievableCapacity = tier_limited_capacity;
                     bestClearance = clearance;
@@ -854,7 +889,6 @@
             if (currentStep === 1) {
                 progressPercent = 5;
             } else if (currentStep === 2) {
-                // Prevenir división por cero si el set de preguntas está vacío
                 if (totalQuestions === 0) {
                     progressPercent = 10;
                 } else {
@@ -1096,13 +1130,11 @@
                 }
             });
 
-            // Calcular límite por Afluencia de Público (aplica a opciones 2 y 3)
             let public_limit = Infinity;
             if (userData.answers.public_nearby === 'Sí, hay uno cerca') {
                 const distance = parseFloat(userData.answers.public_distance || 0);
                 public_limit = getLimitFromDistance(distance, publicClearanceTiers);
                 
-                // Si la distancia es tan corta que el límite es 0kg, es un fallo crítico
                 if (public_limit === 0 && allCriticalPassed) {
                      allCriticalPassed = false;
                      userData.failures.push(`La distancia de ${distance}m a un lugar de afluencia pública es insuficiente. Se requiere un mínimo de ${publicClearanceTiers[0].distance}m para la capacidad más baja.`);
@@ -1119,8 +1151,8 @@
                         legal_limit = 120;
                         calculated_capacity = 120;
                         final_capacity = 120;
-                        balonesCount = 12; // 12 balones de 10kg
-                        area = 1; // No relevante
+                        balonesCount = 12; 
+                        area = 1; 
                         capacityLimits = {
                             base: 120,
                             ventilacion: 'No aplica',
@@ -1136,18 +1168,17 @@
                         const totalLargo = parseFloat(dims.largo || 0);
                         const totalAncho = parseFloat(dims.ancho || 0);
                         
-                        // --- NUEVO CÁLCULO "EL GANADOR" ---
                         const capacityResult = calculateMaxCapacity(totalLargo, totalAncho);
-                        calculated_capacity = capacityResult.capacity; // Capacidad "ganadora"
+                        calculated_capacity = capacityResult.capacity; 
                         winning_clearance = capacityResult.clearance;
                         
-                        // Recalcular balones y área para el reporte
                         balonesCount = Math.floor(calculated_capacity / 10);
+                        // El área útil no se puede calcular tan fácil por la lógica de pasillos,
+                        // pero para el reporte, usaremos el área basada en el despeje ganador
                         const usableLargo = totalLargo - (winning_clearance * 2);
                         const usableAncho = totalAncho - (winning_clearance * 2);
                         area = (usableLargo > 0 && usableAncho > 0) ? (usableLargo * usableAncho) : 0;
-                        // --- FIN NUEVO CÁLCULO ---
-
+                        
                         const base_legal_limit = 5000; 
                         
                         const ventilacionMetros = parseFloat(userData.answers.ventilation_size || 0);
@@ -1167,7 +1198,6 @@
                         const hayPisosArriba = userData.answers.pisos_superiores === 'Sí, hay pisos arriba';
                         const pisos_limit = hayPisosArriba ? PISOS_SUPERIORES_LIMIT : Infinity;
 
-                        // Se añade public_limit al cálculo
                         legal_limit = Math.min(base_legal_limit, ventilacion_limit, pisos_limit, public_limit);
                         final_capacity = Math.min(legal_limit, calculated_capacity);
                         
@@ -1190,7 +1220,6 @@
                         const totalLargo_3 = parseFloat(dims_3.largo || 0);
                         const totalAncho_3 = parseFloat(dims_3.ancho || 0);
                         
-                        // --- NUEVO CÁLCULO "EL GANADOR" ---
                         const capacityResult_3 = calculateMaxCapacity(totalLargo_3, totalAncho_3);
                         calculated_capacity = capacityResult_3.capacity;
                         winning_clearance = capacityResult_3.clearance;
@@ -1199,10 +1228,8 @@
                         const usableLargo_3 = totalLargo_3 - (winning_clearance * 2);
                         const usableAncho_3 = totalAncho_3 - (winning_clearance * 2);
                         area = (usableLargo_3 > 0 && usableAncho_3 > 0) ? (usableLargo_3 * usableAncho_3) : 0;
-                        // --- FIN NUEVO CÁLCULO ---
                         
                         const base_legal_limit_3 = 50000;
-                        // Se añade public_limit al cálculo
                         legal_limit = Math.min(base_legal_limit_3, public_limit);
                         final_capacity = Math.min(legal_limit, calculated_capacity);
 
@@ -1279,7 +1306,7 @@
                      
                      capacityHTML = `
                         <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
-                        <p>Considerando un despeje óptimo de <strong>${cap.limits.despeje_requerido}m</strong>, tu capacidad MÁXIMA por ESPACIO ÚTIL ("El Ganador") es: <strong>${cap.limits.por_espacio.toLocaleString()} kg</strong></p>
+                        <p>Considerando un despeje óptimo de <strong>${cap.limits.despeje_requerido}m</strong> (y pasillos si son necesarios), tu capacidad MÁXIMA por ESPACIO ÚTIL ("El Ganador") es: <strong>${Math.floor(cap.limits.por_espacio).toLocaleString()} kg</strong></p>
                         
                         <hr style="margin: 10px 0;">
                         
@@ -1295,7 +1322,7 @@
                         
                         <hr style="margin: 10px 0;">
                         
-                        <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity.toLocaleString()} kg</p>
+                        <p class="final-capacity">Capacidad Máxima Aprobada: ${Math.floor(cap.final_capacity).toLocaleString()} kg</p>
                         <small style="text-align:center; display:block;">(Equivalente a ${cap.balones_count} balones de 10kg)</small>
                         <small style="text-align:center; display:block;">(Se aprueba el valor más bajo entre tu Límite Legal y tu Capacidad por Espacio)</small>
                     `;
@@ -1347,7 +1374,7 @@
                 <p><strong>Tipo de Almacén:</strong> ${userData.optionText}</p>
                 <p><strong>Resultado:</strong> ${userData.result}</p>
                 
-                ${userData.result === 'Aprobado' ? `<p><strong>Capacidad Aprobada:</strong> ${userData.capacity.final_capacity.toLocaleString()} kg (${userData.capacity.balones_count} balones)</p>` : ''}
+                ${userData.result === 'Aprobado' ? `<p><strong>Capacidad Aprobada:</strong> ${Math.floor(userData.capacity.final_capacity).toLocaleString()} kg (${userData.capacity.balones_count} balones)</p>` : ''}
                 
                 <strong>Respuestas Marcadas:</strong>
                 <ul>
@@ -1390,17 +1417,22 @@
             currentStep = 1;
             currentQuestionIndex = 0;
             selectedOption = null;
-            // Recargar el questionSet original (sin las preguntas añadidas dinámicamente)
-            // Esto es un bug potencial si no se resetea bien.
-            // La forma más segura es recargar la página, pero para este script:
             
-            // Eliminar las preguntas añadidas de los sets
-            // Esta es una forma simple de "resetear" el array a su estado original
+            // --- Resetear los questionSets ---
+            // Esto es un poco "feo" pero asegura que se reinicien si se modificaron
+            const basePublicQuestions = [
+                { id: 'public_nearby', text: '¿Existen lugares de afluencia de público cercanos? ...', type: 'binary', options: ['Sí, hay uno cerca', 'No hay ninguno'], critical: false },
+                { id: 'public_distance', text: '¿A cuántos metros está el lugar de afluencia de público más cercano?', type: 'number', helpText: 'Mida la distancia...', critical: false, dependsOn: { id: 'public_nearby', value: 'Sí, hay uno cerca' }, condition: (answer) => true, failureMessage: '' }
+            ];
+
+            // Filtrar las preguntas viejas
             questionSets[2] = questionSets[2].filter(q => q.id !== 'public_nearby' && q.id !== 'public_distance');
             questionSets[3] = questionSets[3].filter(q => q.id !== 'public_nearby' && q.id !== 'public_distance');
-            // Re-añadirlas
-            questionSets[2].splice(5, 0, ...newPublicQuestions); 
-            questionSets[3].splice(3, 0, ...newPublicQuestions);
+            
+            // Re-añadir las preguntas en la posición correcta (regenerándolas por si acaso)
+            questionSets[2].splice(5, 0, ...basePublicQuestions.map(q => ({...q}))); // Copia profunda simple
+            questionSets[3].splice(3, 0, ...basePublicQuestions.map(q => ({...q}))); 
+            // --- Fin Reseteo ---
 
             currentQuestionSet = [];
             userData.option = '';
