@@ -228,7 +228,6 @@
             font-size: 1.1em;
             margin-bottom: 10px;
         }
-        /* */
         .capacity-box ul {
             text-align: left;
             margin-left: 20px;
@@ -240,8 +239,6 @@
             padding-left: 5px;
             margin-bottom: 5px;
         }
-         /* */
-
         .capacity-box .final-capacity {
             font-size: 1.6em;
             font-weight: bold;
@@ -385,10 +382,10 @@
     <script>
         // --- CONSTANTES ---
         const TRANSFORMERMINDISTANCE = 7.6;
-        const VENTILATIONMINAREA = 6; // <-- CAMBIO AQUÍ: Esto es ahora el MÍNIMO REQUERIDO
+        const VENTILATIONMINAREA = 6;
         const WALL_CLEARANCE = 4.6;
         const MINDIMENSIONTOTAL = WALL_CLEARANCE * 2;
-        const PISOS_SUPERIORES_LIMIT = 300; // <-- CAMBIO AQUÍ: Nuevo límite
+        const PISOS_SUPERIORES_LIMIT = 300;
 
         // --- PREGUNTAS ---
         const questionSets = {
@@ -429,7 +426,7 @@
                     failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMERMINDISTANCE} metros. El riesgo eléctrico es muy alto.`
                 }
             ],
-            2: [ // <-- CAMBIOS IMPORTANTES EN ESTA SECCIÓN
+            2: [ 
                 {
                     id: 'ventilation_type',
                     text: '¿La ventilación de tu almacén es PERMANENTE? (Ej: rejas, calados, un hueco que no se puede cerrar)',
@@ -443,7 +440,7 @@
                     id: 'ventilation_size',
                     text: '¿Qué tamaño tiene esa ventilación (en metros cuadrados)?',
                     type: 'number',
-                    // helpText: `Mide el ANCHO y el ALTO de tu reja. El mínimo es ${VENTILATIONMINAREA} m². ¡Importante! El tamaño de tu ventilación afectará tu capacidad máxima de almacén.`,
+                    helpText: `Mide el ANCHO y el ALTO de tu reja. El mínimo es ${VENTILATIONMINAREA} m². ¡Importante! El tamaño de tu ventilación afectará tu capacidad máxima de almacén.`,
                     critical: true,
                     condition: (answer) => parseFloat(answer) >= VENTILATIONMINAREA,
                     failureMessage: `La ventilación debe ser de al menos ${VENTILATIONMINAREA} metros cuadrados para asegurar que el gas escape si hay una fuga.`
@@ -501,15 +498,15 @@
                     condition: (answer) => answer === 'Ladrillo / Cemento (Noble)',
                     failureMessage: 'Las PAREDES no pueden ser de material inflamable (madera, estera, drywall).'
                 },
-                // {
+                {
                     id: 'pisos_superiores',
                     text: '¿Hay pisos superiores (otra vivienda, oficinas) ENCIMA de tu almacén?',
                     type: 'binary',
                     options: ['Sí, hay pisos arriba', 'No, es el último piso / techo libre'],
-                    critical: false, // No es un fallo, pero limita la capacidad a 300kg
+                    critical: false,
                     helpText: 'Si hay construcción sobre tu almacén, la capacidad máxima se restringe por seguridad a 300 kg.'
                 },
-                // {
+                {
                     id: 'puerta_adicional',
                     text: 'Además de la puerta principal, ¿tu almacén tiene OTRA puerta de salida?',
                     type: 'binary',
@@ -533,11 +530,15 @@
                     type: 'dimensions',
                     helpText: `¡Importante! La norma exige 4.6 metros de espacio libre entre los balones y cualquier pared. Esto significa que tu cuarto debe tener un LARGO y ANCHO total de al menos ${MINDIMENSIONTOTAL} metros (9.2m) cada uno.`,
                     critical: true,
-                    condition: (answer) => parseFloat(answer.largo) >= MINDIMENSIONTOTAL && parseFloat(answer.ancho) >= MINDIMENSIONTOTAL,
+                    condition: (answer) => {
+                        // Evitar error si answer no está inicializado
+                        if (!answer || typeof answer.largo === 'undefined' || typeof answer.ancho === 'undefined') return false; 
+                        return parseFloat(answer.largo) >= MINDIMENSIONTOTAL && parseFloat(answer.ancho) >= MINDIMENSIONTOTAL;
+                    },
                     failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu local debe medir al menos ${MINDIMENSIONTOTAL} x ${MINDIMENSIONTOTAL} metros.`
                 }
             ],
-            3: [ // Sin cambios en esta sección
+            3: [ 
                 {
                     id: 'businesses',
                     text: '⚠️ ¡Atención! ¿Alguno de tus vecinos (costados, atrás, frente) tiene un taller de soldadura, mecánica, carpintería o un negocio que bote chispas?',
@@ -606,7 +607,11 @@
                     type: 'dimensions',
                     helpText: `¡Importante! La norma exige 4.6 metros de espacio libre entre los balones y cualquier pared. Esto significa que tu área debe tener un LARGO y ANCHO total de al menos ${MINDIMENSIONTOTAL} metros (9.2m) cada uno.`,
                     critical: true,
-                    condition: (answer) => parseFloat(answer.largo) >= MINDIMENSIONTOTAL && parseFloat(answer.ancho) >= MINDIMENSIONTOTAL,
+                    condition: (answer) => {
+                         // Evitar error si answer no está inicializado
+                        if (!answer || typeof answer.largo === 'undefined' || typeof answer.ancho === 'undefined') return false; 
+                        return parseFloat(answer.largo) >= MINDIMENSIONTOTAL && parseFloat(answer.ancho) >= MINDIMENSIONTOTAL;
+                    },
                     failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu área debe medir al menos ${MINDIMENSIONTOTAL} x ${MINDIMENSIONTOTAL} metros.`
                 }
             ]
@@ -629,25 +634,31 @@
         let totalQuestions = 0;
 
         // --- ELEMENTOS DOM ---
-        const steps = document.querySelectorAll('.step');
-        const progressBar = document.getElementById('progress');
-        const dniInput = document.getElementById('dni');
-        const saveDniBtn = document.getElementById('saveDni');
-        const dniMessage = document.getElementById('dniMessage');
-        const wizardContainer = document.getElementById('wizard-container');
-        const optionCards = document.querySelectorAll('.option-card');
-        const questionDisplay = document.getElementById('question-display');
-        const nextQuestionBtn = document.getElementById('nextQuestion');
-        const prevQuestionBtn = document.getElementById('prevQuestion');
-        const resultContainer = document.getElementById('result-container');
-        const restartBtn = document.getElementById('restart');
-        const declaration = document.getElementById('declaration');
-        const declDni = document.getElementById('decl-dni');
-        const declarationContent = document.getElementById('declaration-content');
-        const printDeclarationBtn = document.getElementById('printDeclaration');
+        let steps, progressBar, dniInput, saveDniBtn, dniMessage, wizardContainer;
+        let optionCards, questionDisplay, nextQuestionBtn, prevQuestionBtn;
+        let resultContainer, restartBtn, declaration, declDni, declarationContent, printDeclarationBtn;
 
         // --- EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', function () {
+            
+            // Asignamos las variables DESPUÉS de que el DOM esté listo
+            steps = document.querySelectorAll('.step');
+            progressBar = document.getElementById('progress');
+            dniInput = document.getElementById('dni');
+            saveDniBtn = document.getElementById('saveDni');
+            dniMessage = document.getElementById('dniMessage');
+            wizardContainer = document.getElementById('wizard-container');
+            optionCards = document.querySelectorAll('.option-card');
+            questionDisplay = document.getElementById('question-display');
+            nextQuestionBtn = document.getElementById('nextQuestion');
+            prevQuestionBtn = document.getElementById('prevQuestion');
+            resultContainer = document.getElementById('result-container');
+            restartBtn = document.getElementById('restart');
+            declaration = document.getElementById('declaration');
+            declDni = document.getElementById('decl-dni');
+            declarationContent = document.getElementById('declaration-content');
+            printDeclarationBtn = document.getElementById('printDeclaration');
+
             // Verificar que los elementos existen antes de agregar event listeners
             if (saveDniBtn) {
                 saveDniBtn.addEventListener('click', saveDni);
@@ -682,6 +693,7 @@
                 printDeclarationBtn.addEventListener('click', printDeclaration);
             }
         });
+
 
         // --- FUNCIONES PRINCIPALES ---
 
@@ -732,7 +744,12 @@
             if (currentStep === 1) {
                 progressPercent = 5;
             } else if (currentStep === 2) {
-                progressPercent = 10 + (currentQuestionIndex / totalQuestions) * 80;
+                // Prevenir división por cero si el set de preguntas está vacío
+                if (totalQuestions === 0) {
+                    progressPercent = 10;
+                } else {
+                    progressPercent = 10 + (currentQuestionIndex / totalQuestions) * 80;
+                }
             } else if (currentStep === 3) {
                 progressPercent = 100;
             }
@@ -744,7 +761,6 @@
         function showQuestion(index) {
             questionDisplay.innerHTML = '';
             
-            // Si el índice está fuera de rango, manejar navegación
             if (index < 0 || index >= totalQuestions) {
                 if (index < 0) {
                     goToStep(1);
@@ -757,15 +773,12 @@
 
             const question = currentQuestionSet[index];
             
-            // Verificar dependencias
             if (question.dependsOn) {
                 const dependency = question.dependsOn;
                 const dependencyAnswer = userData.answers[dependency.id];
                 
-                // Si la dependencia no se cumple, saltar esta pregunta
                 if (dependencyAnswer !== dependency.value) {
                     userData.answers[question.id] = 'N/A (Saltada)';
-                    // Mostrar la siguiente pregunta
                     showQuestion(index + 1);
                     return;
                 }
@@ -773,13 +786,11 @@
 
             currentQuestionIndex = index;
             
-            // Mostrar pregunta
             const qText = document.createElement('div');
             qText.className = 'question-text';
             qText.textContent = question.text;
             questionDisplay.appendChild(qText);
             
-            // Mostrar texto de ayuda si existe
             if (question.helpText) {
                 const qHelp = document.createElement('div');
                 qHelp.className = 'help-text';
@@ -800,20 +811,15 @@
                         btn.className = 'btn-option';
                         btn.textContent = opt;
                         
-                        // Marcar como seleccionado si ya fue respondido
                         if (savedAnswer === opt) {
                             btn.classList.add('selected');
                         }
                         
                         btn.onclick = () => {
-                            // Remover selección anterior
                             qOptions.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
-                            // Seleccionar actual
                             btn.classList.add('selected');
-                            // Guardar respuesta
                             userData.answers[question.id] = opt;
                             
-                            // Avanzar automáticamente si es la última pregunta
                             if (currentQuestionIndex === totalQuestions - 1) {
                                 setTimeout(evaluateAnswers, 500);
                             } else {
@@ -841,7 +847,6 @@
                     inputNum.style.width = '200px';
                     inputNum.style.textAlign = 'center';
                     
-                    // Cargar valor guardado si existe
                     if (savedAnswer && savedAnswer !== 'N/A (Saltada)') {
                         inputNum.value = savedAnswer;
                     }
@@ -857,12 +862,10 @@
                 case 'dimensions':
                     qOptions.className = 'dimensions-grid';
                     
-                    // Inicializar datos si no existen
                     if (!savedAnswer || typeof savedAnswer !== 'object') {
                         userData.answers[question.id] = { largo: '', ancho: '' };
                     }
                     
-                    // Crear elementos de forma dinámica
                     const labelLargo = document.createElement('label');
                     labelLargo.setAttribute('for', `dim-largo-${question.id}`);
                     labelLargo.textContent = 'Largo (m):';
@@ -887,7 +890,6 @@
                     inputAncho.min = '0';
                     inputAncho.value = userData.answers[question.id].ancho || '';
                     
-                    // Adjuntar eventos
                     inputLargo.addEventListener('input', function() {
                         userData.answers[question.id].largo = this.value;
                     });
@@ -896,7 +898,6 @@
                         userData.answers[question.id].ancho = this.value;
                     });
                     
-                    // Agregar elementos al contenedor
                     qOptions.appendChild(labelLargo);
                     qOptions.appendChild(inputLargo);
                     qOptions.appendChild(labelAncho);
@@ -906,7 +907,6 @@
             
             questionDisplay.appendChild(qOptions);
             
-            // Configurar botones de navegación
             prevQuestionBtn.disabled = (index === 0);
             nextQuestionBtn.textContent = (index === totalQuestions - 1) ? 'Finalizar Evaluación 🏁' : 'Siguiente ➡️';
             nextQuestionBtn.style.display = 'block';
@@ -918,7 +918,6 @@
             const question = currentQuestionSet[currentQuestionIndex];
             const answer = userData.answers[question.id];
             
-            // Validar según el tipo de pregunta
             let isValid = true;
             let errorMessage = '';
             
@@ -927,7 +926,6 @@
                 errorMessage = 'Por favor, selecciona una respuesta.';
             } 
             else if (question.type === 'number') {
-                // Para número, validar que sea un número válido y mayor o igual a 0
                 const numValue = parseFloat(answer);
                 isValid = !isNaN(numValue) && numValue >= 0;
                 errorMessage = 'Por favor, ingresa un número válido mayor o igual a 0.';
@@ -937,7 +935,6 @@
                 const largo = parseFloat(dims.largo);
                 const ancho = parseFloat(dims.ancho);
                 
-                // Validar que ambos campos tengan valores válidos y mayores a 0
                 isValid = !isNaN(largo) && largo > 0 && !isNaN(ancho) && ancho > 0;
                 errorMessage = 'Por favor, ingresa valores válidos para largo y ancho (mayores a 0).';
             }
@@ -947,7 +944,6 @@
                 return;
             }
             
-            // Navegar a la siguiente pregunta o finalizar
             if (currentQuestionIndex < totalQuestions - 1) {
                 showQuestion(currentQuestionIndex + 1);
             } else {
@@ -969,44 +965,48 @@
             let allCriticalPassed = true;
             
             let legal_limit = 0;
-            let calculated_capacity = 0; // Capacidad por espacio
+            let calculated_capacity = 0; 
             let final_capacity = 0;
             let area = 0;
             let balonesCount = 0;
 
-            // Revisar todas las preguntas
             currentQuestionSet.forEach(question => {
                 const answer = userData.answers[question.id];
                 
                 if (answer === 'N/A (Saltada)') return; 
                 
-                // Comprobar fallos críticos
+                // Añadido 'question.condition &&' para evitar errores en preguntas no críticas
                 if (question.critical && question.condition && !question.condition(answer)) {
                     allCriticalPassed = false;
                     userData.failures.push(question.failureMessage);
                 }
                 
-                // Comprobar recomendaciones (no críticas)
                 if (!question.critical && question.recommendationMessage && question.condition && !question.condition(answer)) {
                      userData.recommendations.push(question.recommendationMessage);
                 }
             });
 
-            // Si pasó, calcular capacidad
             if(allCriticalPassed) {
                 userData.result = 'Aprobado';
                 const answers = userData.answers;
-                let capacityLimits = {}; // <-- CAMBIO AQUÍ: Objeto para guardar todos los límites
+                let capacityLimits = {}; 
 
                 switch (selectedOption) {
                     case '1': // Rack
                         legal_limit = 120;
                         calculated_capacity = 120;
                         final_capacity = 120;
+                        balonesCount = 12; // 12 balones de 10kg
+                        area = 1; // Area no relevante, pero se inicializa
+                        capacityLimits = {
+                            base: 120,
+                            ventilacion: 'No aplica',
+                            pisos_superiores: 'No aplica',
+                            por_espacio: 120
+                        };
                         break;
                     
                     case '2': // Con Techo
-                        // // --- 1. CÁLCULO POR ESPACIO (IGUAL QUE ANTES) ---
                         const dims = userData.answers.storage_dimensions || {};
                         const totalLargo = parseFloat(dims.largo || 0);
                         const totalAncho = parseFloat(dims.ancho || 0);
@@ -1025,12 +1025,11 @@
                         } else {
                             calculated_capacity = 0;
                             balonesCount = 0;
+                            area = 0;
                         }
 
-                        // --- 2. CÁLCULO DE LÍMITES REGLAMENTARIOS ---
-                        const base_legal_limit = 5000; // Límite de "Local con Techo"
+                        const base_legal_limit = 5000; 
                         
-                        // 2a. Límite por Ventilación
                         const ventilacionMetros = parseFloat(userData.answers.ventilation_size || 0);
                         let ventilacion_limit = 0;
                         if (ventilacionMetros >= 30) {
@@ -1041,20 +1040,21 @@
                             ventilacion_limit = 3000;
                         } else if (ventilacionMetros >= 12) {
                             ventilacion_limit = 2000;
-                        } else if (ventilacionMetros >= 6) {
+                        } else if (ventilacionMetros >= 6) { // Asumimos >= 6, ya que es el mínimo
                             ventilacion_limit = 1000;
                         }
                         
-                        // 2b. Límite por Pisos Superiores
                         const hayPisosArriba = userData.answers.pisos_superiores === 'Sí, hay pisos arriba';
                         const pisos_limit = hayPisosArriba ? PISOS_SUPERIORES_LIMIT : Infinity;
 
-                        // El límite legal es el MÁS BAJO de todos los límites reglamentarios
                         legal_limit = Math.min(base_legal_limit, ventilacion_limit, pisos_limit);
-
-                        // La capacidad final es la MÁS BAJA entre el límite legal y el cálculo por espacio
                         final_capacity = Math.min(legal_limit, calculated_capacity);
                         
+                        // Recalcular balones si la capacidad final es menor
+                        if (final_capacity < calculated_capacity) {
+                            balonesCount = Math.floor(final_capacity / 10);
+                        }
+
                         capacityLimits = {
                             base: base_legal_limit,
                             ventilacion: ventilacion_limit,
@@ -1062,9 +1062,8 @@
                             por_espacio: calculated_capacity
                         };
                         break;
-                        // --- FIN DE LA NUEVA LÓGICA PARA CASE 2 ---
 
-                    case '3': // Sin Techo (Lógica de capacidad es la misma que ANTES)
+                    case '3': // Sin Techo
                         const dims_3 = userData.answers.storage_dimensions || {};
                         const totalLargo_3 = parseFloat(dims_3.largo || 0);
                         const totalAncho_3 = parseFloat(dims_3.ancho || 0);
@@ -1083,12 +1082,16 @@
                         } else {
                             calculated_capacity = 0;
                             balonesCount = 0;
+                            area = 0;
                         }
                         
                         legal_limit = 50000;
                         final_capacity = Math.min(legal_limit, calculated_capacity);
 
-                        // Llenar los límites para la tarjeta de resultados
+                        if (final_capacity < calculated_capacity) {
+                            balonesCount = Math.floor(final_capacity / 10);
+                        }
+
                         capacityLimits = {
                             base: legal_limit,
                             ventilacion: 'No aplica',
@@ -1099,12 +1102,12 @@
                 }
                 
                 userData.capacity = {
-                    legal_limit: legal_limit, // El límite legal final (el min de los reglamentarios)
+                    legal_limit: legal_limit,
                     area: area,
-                    calculated_capacity: calculated_capacity, // Capacidad por espacio
-                    final_capacity: final_capacity, // La capacidad aprobada final
+                    calculated_capacity: calculated_capacity,
+                    final_capacity: final_capacity,
                     balones_count: balonesCount,
-                    limits: capacityLimits // Guardamos el desglose
+                    limits: capacityLimits
                 };
 
             } else {
@@ -1133,23 +1136,25 @@
                 if (selectedOption === '1') {
                      capacityHTML = `
                         <p>Tu modalidad es RACK/JAULA. El límite es fijo.</p>
-                        <p class="final-capacity">Capacidad Máxima: ${cap.final_capacity} kg</p>
-                        <p><em>Para racks/jaulas la capacidad máxima permitida es de 120 kg</em></p>
+                        <p class="final-capacity">Capacidad Máxima: ${cap.final_capacity.toLocaleString()} kg</p>
+                        <p><em>(Equivalente a ${cap.balones_count} balones de 10kg)</em></p>
                      `;
                 } else {
-                     // const dims = userData.answers.storage_dimensions;
+                     const dims = userData.answers.storage_dimensions;
                      
                      let ventilacionHTML = '';
                      let pisosHTML = '';
                      
                      if(selectedOption === '2') {
                         ventilacionHTML = `<li>Límite por Ventilación (${userData.answers.ventilation_size} m²): <strong>${cap.limits.ventilacion.toLocaleString()} kg</strong></li>`;
-                        pisosHTML = `<li>Límite por Pisos Superiores: <strong>${cap.limits.pisos_superiores.toLocaleString()} kg</strong></li>`;
+                        // Corregido: .toLocaleString() solo a números
+                        let pisosLimitText = (typeof cap.limits.pisos_superiores === 'number') ? cap.limits.pisos_superiores.toLocaleString() : cap.limits.pisos_superiores;
+                        pisosHTML = `<li>Límite por Pisos Superiores: <strong>${pisosLimitText} kg</strong></li>`;
                      }
                      
                      capacityHTML = `
                         <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
-                        <p>Tu capacidad MÁXIMA por ESPACIO ÚTIL es: <strong>${cap.limits.por_espacio.toLocaleString()} kg</strong> (${cap.balones_count} balones)</p>
+                        <p>Tu capacidad MÁXIMA por ESPACIO ÚTIL es: <strong>${cap.limits.por_espacio.toLocaleString()} kg</strong></p>
                         
                         <hr style="margin: 10px 0;">
                         
@@ -1165,9 +1170,10 @@
                         <hr style="margin: 10px 0;">
                         
                         <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity.toLocaleString()} kg</p>
+                        <small style="text-align:center; display:block;">(Equivalente a ${cap.balones_count} balones de 10kg)</small>
                         <small style="text-align:center; display:block;">(Se aprueba el valor más bajo entre tu Límite Legal y tu Capacidad por Espacio)</small>
                     `;
-                    // }
+                }
 
                 resultContainer.innerHTML = `
                     <div class="result success">
@@ -1215,7 +1221,7 @@
                 <p><strong>Tipo de Almacén:</strong> ${userData.optionText}</p>
                 <p><strong>Resultado:</strong> ${userData.result}</p>
                 
-                ${userData.result === 'Aprobado' ? `<p><strong>Capacidad Aprobada:</strong> ${userData.capacity.final_capacity} kg</p>` : ''}
+                ${userData.result === 'Aprobado' ? `<p><strong>Capacidad Aprobada:</strong> ${userData.capacity.final_capacity.toLocaleString()} kg (${userData.capacity.balones_count} balones)</p>` : ''}
                 
                 <strong>Respuestas Marcadas:</strong>
                 <ul>
@@ -1270,7 +1276,6 @@
             declaration.classList.add('hidden');
             questionDisplay.innerHTML = '';
             
-            // Habilitar el input de DNI para que pueda iniciar sesión de nuevo si lo desea
             dniInput.disabled = false;
             saveDniBtn.disabled = false;
             dniMessage.textContent = '';
