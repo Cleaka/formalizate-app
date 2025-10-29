@@ -228,6 +228,20 @@
             font-size: 1.1em;
             margin-bottom: 10px;
         }
+        /* */
+        .capacity-box ul {
+            text-align: left;
+            margin-left: 20px;
+            margin-bottom: 10px;
+            list-style-type: '➡️ ';
+            padding-left: 10px;
+        }
+        .capacity-box li {
+            padding-left: 5px;
+            margin-bottom: 5px;
+        }
+         /* */
+
         .capacity-box .final-capacity {
             font-size: 1.6em;
             font-weight: bold;
@@ -371,9 +385,10 @@
     <script>
         // --- CONSTANTES ---
         const TRANSFORMERMINDISTANCE = 7.6;
-        const VENTILATIONMINAREA = 6;
+        const VENTILATIONMINAREA = 6; // <-- CAMBIO AQUÍ: Esto es ahora el MÍNIMO REQUERIDO
         const WALL_CLEARANCE = 4.6;
         const MINDIMENSIONTOTAL = WALL_CLEARANCE * 2;
+        const PISOS_SUPERIORES_LIMIT = 300; // <-- CAMBIO AQUÍ: Nuevo límite
 
         // --- PREGUNTAS ---
         const questionSets = {
@@ -414,7 +429,7 @@
                     failureMessage: `La distancia mínima al transformador debe ser ${TRANSFORMERMINDISTANCE} metros. El riesgo eléctrico es muy alto.`
                 }
             ],
-            2: [
+            2: [ // <-- CAMBIOS IMPORTANTES EN ESTA SECCIÓN
                 {
                     id: 'ventilation_type',
                     text: '¿La ventilación de tu almacén es PERMANENTE? (Ej: rejas, calados, un hueco que no se puede cerrar)',
@@ -428,7 +443,7 @@
                     id: 'ventilation_size',
                     text: '¿Qué tamaño tiene esa ventilación (en metros cuadrados)?',
                     type: 'number',
-                    helpText: `Mide el ANCHO y el ALTO de tu reja. Si mide 2m de ancho por 3m de alto, son 6 metros cuadrados. El mínimo es ${VENTILATIONMINAREA} m².`,
+                    // helpText: `Mide el ANCHO y el ALTO de tu reja. El mínimo es ${VENTILATIONMINAREA} m². ¡Importante! El tamaño de tu ventilación afectará tu capacidad máxima de almacén.`,
                     critical: true,
                     condition: (answer) => parseFloat(answer) >= VENTILATIONMINAREA,
                     failureMessage: `La ventilación debe ser de al menos ${VENTILATIONMINAREA} metros cuadrados para asegurar que el gas escape si hay una fuga.`
@@ -486,13 +501,30 @@
                     condition: (answer) => answer === 'Ladrillo / Cemento (Noble)',
                     failureMessage: 'Las PAREDES no pueden ser de material inflamable (madera, estera, drywall).'
                 },
+                // {
+                    id: 'pisos_superiores',
+                    text: '¿Hay pisos superiores (otra vivienda, oficinas) ENCIMA de tu almacén?',
+                    type: 'binary',
+                    options: ['Sí, hay pisos arriba', 'No, es el último piso / techo libre'],
+                    critical: false, // No es un fallo, pero limita la capacidad a 300kg
+                    helpText: 'Si hay construcción sobre tu almacén, la capacidad máxima se restringe por seguridad a 300 kg.'
+                },
+                // {
+                    id: 'puerta_adicional',
+                    text: 'Además de la puerta principal, ¿tu almacén tiene OTRA puerta de salida?',
+                    type: 'binary',
+                    options: ['Sí, tiene otra puerta', 'No, solo tiene una entrada'],
+                    critical: false,
+                    condition: (answer) => answer === 'No, solo tiene una entrada',
+                    recommendationMessage: 'RECOMENDACIÓN: Si tienes una puerta adicional, esta debe ser clausurada (sellada) para la supervisión de Osinergmin.'
+                },
                 {
                     id: 'haselectricityrecommendation',
                     text: '¿Hay cables eléctricos, enchufes o tomacorrientes DENTRO del almacén?',
                     type: 'binary',
                     options: ['Sí, hay cables/enchufes', 'No, no hay nada eléctrico'],
                     critical: false,
-                    condition: (answer) => answer === 'No, no hay nada eléctrico', // <-- **** ¡AQUÍ ESTÁ LA CORRECCIÓN 1! ****
+                    condition: (answer) => answer === 'No, no hay nada eléctrico',
                     recommendationMessage: 'RECOMENDACIÓN: Debes retirar todas las conexiones eléctricas (cables, enchufes, focos) del interior del almacén.'
                 },
                 {
@@ -505,7 +537,7 @@
                     failureMessage: `El espacio es muy pequeño. Para cumplir la norma de 4.6m de despeje, tu local debe medir al menos ${MINDIMENSIONTOTAL} x ${MINDIMENSIONTOTAL} metros.`
                 }
             ],
-            3: [
+            3: [ // Sin cambios en esta sección
                 {
                     id: 'businesses',
                     text: '⚠️ ¡Atención! ¿Alguno de tus vecinos (costados, atrás, frente) tiene un taller de soldadura, mecánica, carpintería o un negocio que bote chispas?',
@@ -565,7 +597,7 @@
                     type: 'binary',
                     options: ['Sí, hay cables/enchufes', 'No, no hay nada eléctrico'],
                     critical: false,
-                    condition: (answer) => answer === 'No, no hay nada eléctrico', // <-- **** ¡AQUÍ ESTÁ LA CORRECCIÓN 2! ****
+                    condition: (answer) => answer === 'No, no hay nada eléctrico', 
                     recommendationMessage: 'RECOMENDACIÓN: Debes retirar todas las conexiones eléctricas (cables, enchufes) del área de almacenamiento.'
                 },
                 {
@@ -937,7 +969,7 @@
             let allCriticalPassed = true;
             
             let legal_limit = 0;
-            let calculated_capacity = 0;
+            let calculated_capacity = 0; // Capacidad por espacio
             let final_capacity = 0;
             let area = 0;
             let balonesCount = 0;
@@ -964,6 +996,7 @@
             if(allCriticalPassed) {
                 userData.result = 'Aprobado';
                 const answers = userData.answers;
+                let capacityLimits = {}; // <-- CAMBIO AQUÍ: Objeto para guardar todos los límites
 
                 switch (selectedOption) {
                     case '1': // Rack
@@ -973,8 +1006,7 @@
                         break;
                     
                     case '2': // Con Techo
-                    case '3': // Sin Techo (Lógica de capacidad es la misma)
-                        // Limpieza de datos antes de usar (por si acaso)
+                        // // --- 1. CÁLCULO POR ESPACIO (IGUAL QUE ANTES) ---
                         const dims = userData.answers.storage_dimensions || {};
                         const totalLargo = parseFloat(dims.largo || 0);
                         const totalAncho = parseFloat(dims.ancho || 0);
@@ -984,13 +1016,68 @@
                         
                         if (usableLargo > 0 && usableAncho > 0) {
                             area = usableLargo * usableAncho;
-                            
                             const balonDiameter = 0.310;
                             const balonesPorFilaLargo = Math.floor(usableLargo / balonDiameter);
                             const balonesPorFilaAncho = Math.floor(usableAncho / balonDiameter);
                             const balonesPorNivel = balonesPorFilaLargo * balonesPorFilaAncho;
-                            
-                            // 2 niveles de balones
+                            balonesCount = balonesPorNivel * 2; 
+                            calculated_capacity = balonesCount * 10;
+                        } else {
+                            calculated_capacity = 0;
+                            balonesCount = 0;
+                        }
+
+                        // --- 2. CÁLCULO DE LÍMITES REGLAMENTARIOS ---
+                        const base_legal_limit = 5000; // Límite de "Local con Techo"
+                        
+                        // 2a. Límite por Ventilación
+                        const ventilacionMetros = parseFloat(userData.answers.ventilation_size || 0);
+                        let ventilacion_limit = 0;
+                        if (ventilacionMetros >= 30) {
+                            ventilacion_limit = 5000;
+                        } else if (ventilacionMetros >= 24) {
+                            ventilacion_limit = 4000;
+                        } else if (ventilacionMetros >= 18) {
+                            ventilacion_limit = 3000;
+                        } else if (ventilacionMetros >= 12) {
+                            ventilacion_limit = 2000;
+                        } else if (ventilacionMetros >= 6) {
+                            ventilacion_limit = 1000;
+                        }
+                        
+                        // 2b. Límite por Pisos Superiores
+                        const hayPisosArriba = userData.answers.pisos_superiores === 'Sí, hay pisos arriba';
+                        const pisos_limit = hayPisosArriba ? PISOS_SUPERIORES_LIMIT : Infinity;
+
+                        // El límite legal es el MÁS BAJO de todos los límites reglamentarios
+                        legal_limit = Math.min(base_legal_limit, ventilacion_limit, pisos_limit);
+
+                        // La capacidad final es la MÁS BAJA entre el límite legal y el cálculo por espacio
+                        final_capacity = Math.min(legal_limit, calculated_capacity);
+                        
+                        capacityLimits = {
+                            base: base_legal_limit,
+                            ventilacion: ventilacion_limit,
+                            pisos_superiores: hayPisosArriba ? PISOS_SUPERIORES_LIMIT : 'No aplica',
+                            por_espacio: calculated_capacity
+                        };
+                        break;
+                        // --- FIN DE LA NUEVA LÓGICA PARA CASE 2 ---
+
+                    case '3': // Sin Techo (Lógica de capacidad es la misma que ANTES)
+                        const dims_3 = userData.answers.storage_dimensions || {};
+                        const totalLargo_3 = parseFloat(dims_3.largo || 0);
+                        const totalAncho_3 = parseFloat(dims_3.ancho || 0);
+                        
+                        const usableLargo_3 = totalLargo_3 - (WALL_CLEARANCE * 2);
+                        const usableAncho_3 = totalAncho_3 - (WALL_CLEARANCE * 2);
+                        
+                        if (usableLargo_3 > 0 && usableAncho_3 > 0) {
+                            area = usableLargo_3 * usableAncho_3;
+                            const balonDiameter = 0.310;
+                            const balonesPorFilaLargo = Math.floor(usableLargo_3 / balonDiameter);
+                            const balonesPorFilaAncho = Math.floor(usableAncho_3 / balonDiameter);
+                            const balonesPorNivel = balonesPorFilaLargo * balonesPorFilaAncho;
                             balonesCount = balonesPorNivel * 2; 
                             calculated_capacity = balonesCount * 10;
                         } else {
@@ -998,17 +1085,26 @@
                             balonesCount = 0;
                         }
                         
-                        legal_limit = (selectedOption === '2') ? 5000 : 50000;
+                        legal_limit = 50000;
                         final_capacity = Math.min(legal_limit, calculated_capacity);
+
+                        // Llenar los límites para la tarjeta de resultados
+                        capacityLimits = {
+                            base: legal_limit,
+                            ventilacion: 'No aplica',
+                            pisos_superiores: 'No aplica',
+                            por_espacio: calculated_capacity
+                        };
                         break;
                 }
                 
                 userData.capacity = {
-                    legal_limit: legal_limit,
+                    legal_limit: legal_limit, // El límite legal final (el min de los reglamentarios)
                     area: area,
-                    calculated_capacity: calculated_capacity,
-                    final_capacity: final_capacity,
-                    balones_count: balonesCount
+                    calculated_capacity: calculated_capacity, // Capacidad por espacio
+                    final_capacity: final_capacity, // La capacidad aprobada final
+                    balones_count: balonesCount,
+                    limits: capacityLimits // Guardamos el desglose
                 };
 
             } else {
@@ -1026,7 +1122,7 @@
             
             if(userData.recommendations.length > 0) {
                 userData.recommendations.forEach(rec => {
-                    recommendationsHTML += `<div class="recommendation-item">${rec}</div>`;
+                    recommendationsHTML += `<div class="recommendation-item">💡 ${rec}</div>`;
                 });
             }
 
@@ -1041,18 +1137,37 @@
                         <p><em>Para racks/jaulas la capacidad máxima permitida es de 120 kg</em></p>
                      `;
                 } else {
-                     const dims = userData.answers.storage_dimensions;
+                     // const dims = userData.answers.storage_dimensions;
+                     
+                     let ventilacionHTML = '';
+                     let pisosHTML = '';
+                     
+                     if(selectedOption === '2') {
+                        ventilacionHTML = `<li>Límite por Ventilación (${userData.answers.ventilation_size} m²): <strong>${cap.limits.ventilacion.toLocaleString()} kg</strong></li>`;
+                        pisosHTML = `<li>Límite por Pisos Superiores: <strong>${cap.limits.pisos_superiores.toLocaleString()} kg</strong></li>`;
+                     }
+                     
                      capacityHTML = `
                         <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
-                        <p>Área útil para balones (restando 4.6m por lado): <strong>${cap.area.toFixed(2)} m²</strong></p>
-                        <p>Número máximo de balones de 10kg en 2 niveles: <strong>${cap.balones_count} balones</strong></p>
-                        <p>Tu límite legal para Local ${userData.optionText.replace('Hasta', '').trim()} es: <strong>${cap.legal_limit.toLocaleString()} kg</strong></p>
-                        <p>Tu capacidad por espacio útil es: <strong>${cap.calculated_capacity.toLocaleString()} kg</strong></p>
+                        <p>Tu capacidad MÁXIMA por ESPACIO ÚTIL es: <strong>${cap.limits.por_espacio.toLocaleString()} kg</strong> (${cap.balones_count} balones)</p>
+                        
                         <hr style="margin: 10px 0;">
+                        
+                        <p style="text-align:center;"><strong>Límites Reglamentarios (Se aplica el más bajo):</strong></p>
+                        <ul>
+                            <li>Límite por tipo de Local (${userData.optionText}): <strong>${cap.limits.base.toLocaleString()} kg</strong></li>
+                            ${ventilacionHTML}
+                            ${pisosHTML}
+                        </ul>
+                        
+                        <p style="text-align:center;">Tu Límite Legal (el menor de los de arriba) es: <strong>${cap.legal_limit.toLocaleString()} kg</strong></p>
+                        
+                        <hr style="margin: 10px 0;">
+                        
                         <p class="final-capacity">Capacidad Máxima Aprobada: ${cap.final_capacity.toLocaleString()} kg</p>
-                        <small>(Se aprueba el valor más bajo entre el límite legal y el de tu espacio)</small>
+                        <small style="text-align:center; display:block;">(Se aprueba el valor más bajo entre tu Límite Legal y tu Capacidad por Espacio)</small>
                     `;
-                }
+                    // }
 
                 resultContainer.innerHTML = `
                     <div class="result success">
