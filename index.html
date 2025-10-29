@@ -492,6 +492,7 @@
                     type: 'binary',
                     options: ['Sí, hay cables/enchufes', 'No, no hay nada eléctrico'],
                     critical: false,
+                    condition: (answer) => answer === 'No, no hay nada eléctrico', // <-- **** ¡AQUÍ ESTÁ LA CORRECCIÓN 1! ****
                     recommendationMessage: 'RECOMENDACIÓN: Debes retirar todas las conexiones eléctricas (cables, enchufes, focos) del interior del almacén.'
                 },
                 {
@@ -564,6 +565,7 @@
                     type: 'binary',
                     options: ['Sí, hay cables/enchufes', 'No, no hay nada eléctrico'],
                     critical: false,
+                    condition: (answer) => answer === 'No, no hay nada eléctrico', // <-- **** ¡AQUÍ ESTÁ LA CORRECCIÓN 2! ****
                     recommendationMessage: 'RECOMENDACIÓN: Debes retirar todas las conexiones eléctricas (cables, enchufes) del área de almacenamiento.'
                 },
                 {
@@ -946,12 +948,14 @@
                 
                 if (answer === 'N/A (Saltada)') return; 
                 
-                if (question.critical && !question.condition(answer)) {
+                // Comprobar fallos críticos
+                if (question.critical && question.condition && !question.condition(answer)) {
                     allCriticalPassed = false;
                     userData.failures.push(question.failureMessage);
                 }
                 
-                if (!question.critical && question.recommendationMessage && !question.condition(answer)) {
+                // Comprobar recomendaciones (no críticas)
+                if (!question.critical && question.recommendationMessage && question.condition && !question.condition(answer)) {
                      userData.recommendations.push(question.recommendationMessage);
                 }
             });
