@@ -41,10 +41,19 @@
             align-items: center;
             border-bottom: 5px solid var(--primary);
         }
-        .logo {
-            font-size: 32px;
+        .logo {            
+            flex-shrink: 0;
+            margin-right: 20px;
+        }
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+        .header-text .logo-title {
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 5px;
+            color: var(--primary);
+            margin: 0;
         }
         .subtitle {
             font-size: 18px;
@@ -330,13 +339,15 @@
 </head>
 <body>
     <div class="container">
-        <header>
+        <header>          
           <div class="logo">
-            <p>Oficina Regional Pasco - Osinergmin</p>
+            <img src="https://mir-s3-cdn-cf.behance.net/projects/404/20b97e217918471.Y3JvcCwxMDU0LDgyNSwzNzUsMA.png" alt="Logo Osinergmin">
           </div>
-        
-          <div class="subtitle">
-            Asistente de Pre-Evaluación para Inscripción de local de Venta de Balones GLP
+          <div class="header-text">
+             <p class="logo-title">Osinergmin</p>
+             <div class="subtitle">
+                Asistente de Pre-Evaluación para Inscripción de local de Venta de Balones GLP
+             </div>
           </div>
         </header>
 
