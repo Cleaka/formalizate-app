@@ -9,7 +9,7 @@
             --primary: #0139aa;
             --secondary: #00A9E0;
             --success: #27ae60;
-            --warning: #f39c12; /* Color para "Aprobado con Observaciones" */
+            --warning: #f39c12;
             --danger: #e74c3c;
             --light: #ecf0f1;
             --dark: #34495e;
@@ -32,37 +32,21 @@
             padding: 10px;
         }
         header {
-            background: white; /* */
-            color: var(--dark);
+            background: var(--primary);
+            color: white;
             padding: 20px;
-            text-align: left; /* */
+            text-align: center;
             border-radius: 8px 8px 0 0;
-            display: flex; /* */
-            align-items: center;
-            border-bottom: 5px solid var(--primary);
         }
-        
-        /* */
         .logo {
-            flex-shrink: 0;
-            margin-right: 20px;
-        }
-        .logo img {
-            height: 50px; /* Ajusta la altura del logo de Osinergmin */
-            width: auto;
-        }
-        .header-text .logo-title {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: bold;
-            color: var(--primary);
-            margin: 0;
+            margin-bottom: 5px;
         }
         .subtitle {
             font-size: 18px;
             opacity: 0.9;
         }
-        /* Fin cambios de logo */
-
         .card {
             background: white;
             border-radius: 8px;
@@ -227,12 +211,6 @@
             border: 2px solid var(--success);
             color: #219653;
         }
-        /* */
-        .warning {
-            background-color: rgba(243, 156, 18, 0.1);
-            border: 2px solid var(--warning);
-            color: #d35400;
-        }
         .danger {
             background-color: rgba(231, 76, 60, 0.1);
             border: 2px solid var(--danger);
@@ -246,10 +224,6 @@
             border-radius: 8px;
             text-align: left;
         }
-        .warning .capacity-box { /* */
-             border: 2px solid var(--warning);
-        }
-        
         .capacity-box p {
             font-size: 1.1em;
             margin-bottom: 10px;
@@ -355,15 +329,13 @@
     <div class="container">
         <header>
           <div class="logo">
-            <img src="https://www.osinergmin.gob.pe/seccion/institucional/identidad-visual/logo-osinergmin-png-2.png" alt="Logo Osinergmin">
+            <p>Oficina Regional Pasco - Osinergmin</p>
           </div>
-          <div class="header-text">
-             <p class="logo-title">Osinergmin</p>
-             <div class="subtitle">
-                Asistente de Pre-Evaluación para Inscripción de local de Venta de Balones GLP
-             </div>
+        
+          <div class="subtitle">
+            Asistente de Pre-Evaluación para Inscripción de local de Venta de Balones GLP
           </div>
-          </header>
+        </header>
 
         <div class="dni-section card">
             <h2>¡Bienvenido! 👋</h2>
@@ -736,57 +708,90 @@
 
 
         // --- FUNCIONES HELPER DE CÁLCULO ---
-        // (Estas funciones están correctas, no se modifican)
 
+        /**
+         * Calcula la capacidad en KG basada en el espacio útil (ya descontado el despeje).
+         */
         function calculateCapacityFromUsableSpace(usableLargo, usableAncho) {
             if (usableLargo <= 0 || usableAncho <= 0) return 0;
+            
             const balonesPorFilaLargo = Math.floor(usableLargo / BALON_DIAMETER);
             const balonesPorFilaAncho = Math.floor(usableAncho / BALON_DIAMETER);
             const balonesPorNivel = balonesPorFilaLargo * balonesPorFilaAncho;
-            const balonesCount = balonesPorNivel * 2;
-            return balonesCount * 10;
+            const balonesCount = balonesPorNivel * 2; // 2 niveles de apilamiento
+            return balonesCount * 10; // 10kg por balón
         }
 
+        /**
+         * Itera por todos los niveles de despeje para encontrar la capacidad máxima "ganadora".
+         * APLICA LA LÓGICA DE PASILLOS SI SE SUPERA GROUP_MAX_KG.
+         */
         function calculateMaxCapacity(totalLargo, totalAncho) {
             let maxAchievableCapacity = 0;
             let bestClearance = 0;
-            const k = (2 * 10) / (BALON_DIAMETER * BALON_DIAMETER);
+            
+            const k = (2 * 10) / (BALON_DIAMETER * BALON_DIAMETER); // Constante de capacidad por m²
             const Wp = AISLE_WIDTH;
             const Gmax = GROUP_MAX_KG;
+
             for (const tier of wallClearanceTiers) {
                 const clearance = tier.clearance;
                 const usableLargo = totalLargo - (clearance * 2);
                 const usableAncho = totalAncho - (clearance * 2);
+
                 if (usableLargo <= 0 || usableAncho <= 0) continue;
+
                 let potential_capacity = 0;
+                
+                // 1. Calcular capacidad sin pasillos
                 const capacity_no_aisles = calculateCapacityFromUsableSpace(usableLargo, usableAncho);
+
+                // 2. Comprobar si se necesita la lógica de pasillos
                 if (capacity_no_aisles <= Gmax) {
+                    // No se necesitan pasillos, la capacidad es la calculada
                     potential_capacity = capacity_no_aisles;
                 } else {
+                    // Sí se necesitan pasillos. Usar la fórmula algebraica para encontrar la capacidad estable.
+                    
+                    // Caso 1: Pasillos se restan del Largo (se apila a lo ancho)
                     const k_Au_Wp_Gmax = (k * usableAncho * Wp) / Gmax;
                     const k_Au_Lu_Wp = k * usableAncho * (usableLargo + Wp);
+                    // El + Wp es para corregir el N-1 (grupos - 1 pasillos)
                     const capacity_largo = k_Au_Lu_Wp / (1 + k_Au_Wp_Gmax);
+
+                    // Caso 2: Pasillos se restan del Ancho (se apila a lo largo)
                     const k_Lu_Wp_Gmax = (k * usableLargo * Wp) / Gmax;
                     const k_Lu_Au_Wp = k * usableLargo * (usableAncho + Wp);
                     const capacity_ancho = k_Lu_Au_Wp / (1 + k_Lu_Wp_Gmax);
+
+                    // La capacidad potencial es la mejor de las dos orientaciones
                     potential_capacity = Math.max(capacity_largo, capacity_ancho);
                 }
+                
+                // 3. Limitar por el máximo del "tier" de despeje
                 const tier_limited_capacity = Math.min(potential_capacity, tier.maxKg);
+
+                // 4. "El ganador": Buscamos la mayor capacidad lograda en todas las pruebas
                 if (tier_limited_capacity > maxAchievableCapacity) {
                     maxAchievableCapacity = tier_limited_capacity;
                     bestClearance = clearance;
                 }
             }
+            
+            // Retorna la capacidad ganadora y el despeje que la logró
             return { capacity: maxAchievableCapacity, clearance: bestClearance };
         }
 
+        /**
+         * Obtiene el límite de KG permitido según la distancia a un lugar público.
+         */
         function getLimitFromDistance(distance, tiers) {
-            let allowedKg = 0;
+            let allowedKg = 0; // Si no cumple ni el mínimo, es 0
             for (const tier of tiers) {
                 if (distance >= tier.distance) {
-                    allowedKg = tier.maxKg;
+                    allowedKg = tier.maxKg; // Sigue actualizando al máximo permitido
                 } else {
-                    break;
+                    break; // Se detiene en cuanto no cumple una distancia
                 }
             }
             return allowedKg;
@@ -803,7 +808,7 @@
             option: '',
             optionText: '',
             answers: {},
-            result: '', // 'Aprobado', 'Aprobado con Observaciones', 'No Aprobado'
+            result: '',
             failures: [],
             recommendations: []
         };
@@ -817,6 +822,7 @@
         // --- EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', function () {
             
+            // Asignamos las variables DESPUÉS de que el DOM esté listo
             steps = document.querySelectorAll('.step');
             progressBar = document.getElementById('progress');
             dniInput = document.getElementById('dni');
@@ -834,18 +840,39 @@
             declarationContent = document.getElementById('declaration-content');
             printDeclarationBtn = document.getElementById('printDeclaration');
 
-            if (saveDniBtn) { saveDniBtn.addEventListener('click', saveDni); }
-            if (dniInput) { dniInput.addEventListener('keyup', (e) => { if(e.key === 'Enter') saveDni(); }); }
+            // Verificar que los elementos existen antes de agregar event listeners
+            if (saveDniBtn) {
+                saveDniBtn.addEventListener('click', saveDni);
+            }
+            
+            if (dniInput) {
+                dniInput.addEventListener('keyup', (e) => { 
+                    if(e.key === 'Enter') saveDni(); 
+                });
+            }
+
             optionCards.forEach(card => {
                 card.addEventListener('click', function () {
                     selectOption(this);
                     setTimeout(goToStep2, 300); 
                 });
             });
-            if (nextQuestionBtn) { nextQuestionBtn.addEventListener('click', nextQuestion); }
-            if (prevQuestionBtn) { prevQuestionBtn.addEventListener('click', prevQuestion); }
-            if (restartBtn) { restartBtn.addEventListener('click', restartEvaluation); }
-            if (printDeclarationBtn) { printDeclarationBtn.addEventListener('click', printDeclaration); }
+
+            if (nextQuestionBtn) {
+                nextQuestionBtn.addEventListener('click', nextQuestion);
+            }
+            
+            if (prevQuestionBtn) {
+                prevQuestionBtn.addEventListener('click', prevQuestion);
+            }
+            
+            if (restartBtn) {
+                restartBtn.addEventListener('click', restartEvaluation);
+            }
+            
+            if (printDeclarationBtn) {
+                printDeclarationBtn.addEventListener('click', printDeclaration);
+            }
         });
 
 
@@ -873,6 +900,7 @@
             selectedOption = card.getAttribute('data-option');
             currentQuestionSet = questionSets[selectedOption];
             totalQuestions = currentQuestionSet.length;
+            
             userData.option = selectedOption;
             userData.optionText = card.querySelector('h3').textContent;
         }
@@ -894,70 +922,98 @@
 
         function updateProgress() {
             let progressPercent = 0;
-            if (currentStep === 1) { progressPercent = 5; }
-            else if (currentStep === 2) {
-                if (totalQuestions === 0) { progressPercent = 10; }
-                else { progressPercent = 10 + (currentQuestionIndex / totalQuestions) * 80; }
-            } else if (currentStep === 3) { progressPercent = 100; }
+            if (currentStep === 1) {
+                progressPercent = 5;
+            } else if (currentStep === 2) {
+                if (totalQuestions === 0) {
+                    progressPercent = 10;
+                } else {
+                    progressPercent = 10 + (currentQuestionIndex / totalQuestions) * 80;
+                }
+            } else if (currentStep === 3) {
+                progressPercent = 100;
+            }
             progressBar.style.width = `${progressPercent}%`;
         }
 
         // --- LÓGICA DEL ASISTENTE (PASO 2) ---
-        // (Sin cambios en esta sección)
 
         function showQuestion(index) {
             questionDisplay.innerHTML = '';
+            
             if (index < 0 || index >= totalQuestions) {
-                if (index < 0) { goToStep(1); return; }
-                else { evaluateAnswers(); return; }
+                if (index < 0) {
+                    goToStep(1);
+                    return;
+                } else {
+                    evaluateAnswers();
+                    return;
+                }
             }
+
             const question = currentQuestionSet[index];
+            
             if (question.dependsOn) {
                 const dependency = question.dependsOn;
                 const dependencyAnswer = userData.answers[dependency.id];
+                
                 if (dependencyAnswer !== dependency.value) {
                     userData.answers[question.id] = 'N/A (Saltada)';
                     showQuestion(index + 1);
                     return;
                 }
             }
+
             currentQuestionIndex = index;
+            
             const qText = document.createElement('div');
             qText.className = 'question-text';
             qText.textContent = question.text;
             questionDisplay.appendChild(qText);
+            
+            // Agregar imagen referencial si existe
             if (question.referenceImage) {
                 const qImage = document.createElement('img');
                 qImage.className = 'reference-image';
                 qImage.src = question.referenceImage.src;
                 qImage.alt = question.referenceImage.caption;
                 questionDisplay.appendChild(qImage);
+                
                 const qImageCaption = document.createElement('div');
                 qImageCaption.className = 'image-caption';
                 qImageCaption.textContent = question.referenceImage.caption;
                 questionDisplay.appendChild(qImageCaption);
             }
+            
             if (question.helpText) {
                 const qHelp = document.createElement('div');
                 qHelp.className = 'help-text';
                 qHelp.textContent = `💡 ${question.helpText}`;
                 questionDisplay.appendChild(qHelp);
             }
+
             const qOptions = document.createElement('div');
             const savedAnswer = userData.answers[question.id];
+
             switch (question.type) {
                 case 'binary':
                 case 'options':
                     qOptions.className = `answer-options ${question.type === 'binary' ? 'binary' : ''}`;
+                    
                     question.options.forEach(opt => {
                         const btn = document.createElement('button');
                         btn.className = 'btn-option';
                         btn.textContent = opt;
-                        if (savedAnswer === opt) { btn.classList.add('selected'); }
+                        
+                        if (savedAnswer === opt) {
+                            btn.classList.add('selected');
+                        }
+                        
                         btn.onclick = () => {
                             qOptions.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
                             btn.classList.add('selected');
                             userData.answers[question.id] = opt;
+                            
                             if (currentQuestionIndex === totalQuestions - 1) {
                                 setTimeout(evaluateAnswers, 500);
                             } else {
@@ -967,11 +1023,14 @@
                         qOptions.appendChild(btn);
                     });
                     break;
+                    
                 case 'number':
                     qOptions.className = 'answer-options';
+                    
                     const inputContainer = document.createElement('div');
                     inputContainer.style.textAlign = 'center';
                     inputContainer.style.margin = '20px 0';
+                    
                     const inputNum = document.createElement('input');
                     inputNum.type = 'number';
                     inputNum.placeholder = '0.0';
@@ -981,19 +1040,30 @@
                     inputNum.style.padding = '12px';
                     inputNum.style.width = '200px';
                     inputNum.style.textAlign = 'center';
-                    if (savedAnswer && savedAnswer !== 'N/A (Saltada)') { inputNum.value = savedAnswer; }
-                    inputNum.addEventListener('input', function() { userData.answers[question.id] = this.value; });
+                    
+                    if (savedAnswer && savedAnswer !== 'N/A (Saltada)') {
+                        inputNum.value = savedAnswer;
+                    }
+                    
+                    inputNum.addEventListener('input', function() {
+                        userData.answers[question.id] = this.value;
+                    });
+                    
                     inputContainer.appendChild(inputNum);
                     qOptions.appendChild(inputContainer);
                     break;
+                    
                 case 'dimensions':
                     qOptions.className = 'dimensions-grid';
+                    
                     if (!savedAnswer || typeof savedAnswer !== 'object') {
                         userData.answers[question.id] = { largo: '', ancho: '' };
                     }
+                    
                     const labelLargo = document.createElement('label');
                     labelLargo.setAttribute('for', `dim-largo-${question.id}`);
                     labelLargo.textContent = 'Largo (m):';
+                    
                     const inputLargo = document.createElement('input');
                     inputLargo.type = 'number';
                     inputLargo.id = `dim-largo-${question.id}`;
@@ -1001,9 +1071,11 @@
                     inputLargo.step = '0.1';
                     inputLargo.min = '0';
                     inputLargo.value = userData.answers[question.id].largo || '';
+                    
                     const labelAncho = document.createElement('label');
                     labelAncho.setAttribute('for', `dim-ancho-${question.id}`);
                     labelAncho.textContent = 'Ancho (m):';
+                    
                     const inputAncho = document.createElement('input');
                     inputAncho.type = 'number';
                     inputAncho.id = `dim-ancho-${question.id}`;
@@ -1011,26 +1083,38 @@
                     inputAncho.step = '0.1';
                     inputAncho.min = '0';
                     inputAncho.value = userData.answers[question.id].ancho || '';
-                    inputLargo.addEventListener('input', function() { userData.answers[question.id].largo = this.value; });
-                    inputAncho.addEventListener('input', function() { userData.answers[question.id].ancho = this.value; });
+                    
+                    inputLargo.addEventListener('input', function() {
+                        userData.answers[question.id].largo = this.value;
+                    });
+                    
+                    inputAncho.addEventListener('input', function() {
+                        userData.answers[question.id].ancho = this.value;
+                    });
+                    
                     qOptions.appendChild(labelLargo);
                     qOptions.appendChild(inputLargo);
                     qOptions.appendChild(labelAncho);
                     qOptions.appendChild(inputAncho);
                     break;
             }
+            
             questionDisplay.appendChild(qOptions);
+            
             prevQuestionBtn.disabled = (index === 0);
             nextQuestionBtn.textContent = (index === totalQuestions - 1) ? 'Finalizar Evaluación 🏁' : 'Siguiente ➡️';
             nextQuestionBtn.style.display = 'block';
+            
             updateProgress();
         }
 
         function nextQuestion() {
             const question = currentQuestionSet[currentQuestionIndex];
             const answer = userData.answers[question.id];
+            
             let isValid = true;
             let errorMessage = '';
+            
             if (question.type === 'binary' || question.type === 'options') {
                 isValid = answer !== undefined && answer !== '';
                 errorMessage = 'Por favor, selecciona una respuesta.';
@@ -1044,13 +1128,21 @@
                 const dims = answer || {};
                 const largo = parseFloat(dims.largo);
                 const ancho = parseFloat(dims.ancho);
+                
                 isValid = !isNaN(largo) && largo > 0 && !isNaN(ancho) && ancho > 0;
                 errorMessage = 'Por favor, ingresa valores válidos para largo y ancho (mayores a 0).';
             }
-            if (!isValid) { alert(errorMessage); return; }
+            
+            if (!isValid) {
+                alert(errorMessage);
+                return;
+            }
+            
             if (currentQuestionIndex < totalQuestions - 1) {
                 showQuestion(currentQuestionIndex + 1);
-            } else { evaluateAnswers(); }
+            } else {
+                evaluateAnswers();
+            }
         }
 
         function prevQuestion() {
@@ -1066,9 +1158,16 @@
             userData.recommendations = [];
             let allCriticalPassed = true;
             
-            // 1. Recolectar fallas y recomendaciones
+            let legal_limit = 0;
+            let calculated_capacity = 0; 
+            let final_capacity = 0;
+            let area = 0;
+            let balonesCount = 0;
+            let winning_clearance = 0;
+
             currentQuestionSet.forEach(question => {
                 const answer = userData.answers[question.id];
+                
                 if (answer === 'N/A (Saltada)') return; 
                 
                 if (question.critical && question.condition && !question.condition(answer)) {
@@ -1081,37 +1180,21 @@
                 }
             });
 
-            // 2. Chequeo especial de distancia pública
             let public_limit = Infinity;
             if (userData.answers.public_nearby === 'Sí, hay uno cerca') {
                 const distance = parseFloat(userData.answers.public_distance || 0);
                 public_limit = getLimitFromDistance(distance, publicClearanceTiers);
                 
-                if (public_limit === 0 && allCriticalPassed) { // Si no había fallado ANTES
+                if (public_limit === 0 && allCriticalPassed) {
                      allCriticalPassed = false;
                      userData.failures.push(`La distancia de ${distance}m a un lugar de afluencia pública es insuficiente. Se requiere un mínimo de ${publicClearanceTiers[0].distance}m para la capacidad más baja.`);
                 }
             }
-            
-            // 3. --- CAMBIO AQUÍ: Lógica de 3 estados (Verde, Amarillo, Rojo) ---
-            
+
             if(allCriticalPassed) {
-                // Si pasó los críticos, decidimos si es VERDE o AMARILLO
-                if (userData.recommendations.length > 0) {
-                    userData.result = 'Aprobado con Observaciones'; // AMARILLO
-                } else {
-                    userData.result = 'Aprobado'; // VERDE
-                }
-                
-                // --- Si pasó (Verde o Amarillo), calculamos la capacidad ---
-                let legal_limit = 0;
-                let calculated_capacity = 0; 
-                let final_capacity = 0;
-                let area = 0;
-                let balonesCount = 0;
-                let winning_clearance = 0;
-                let capacityLimits = {}; 
+                userData.result = 'Aprobado';
                 const answers = userData.answers;
+                let capacityLimits = {}; 
 
                 switch (selectedOption) {
                     case '1': // Rack
@@ -1121,8 +1204,12 @@
                         balonesCount = 12; 
                         area = 1; 
                         capacityLimits = {
-                            base: 120, ventilacion: 'No aplica', pisos_superiores: 'No aplica',
-                            publico: 'No aplica', por_espacio: 120, despeje_requerido: 'No aplica'
+                            base: 120,
+                            ventilacion: 'No aplica',
+                            pisos_superiores: 'No aplica',
+                            publico: 'No aplica',
+                            por_espacio: 120,
+                            despeje_requerido: 'No aplica'
                         };
                         break;
                     
@@ -1130,31 +1217,51 @@
                         const dims = userData.answers.storage_dimensions || {};
                         const totalLargo = parseFloat(dims.largo || 0);
                         const totalAncho = parseFloat(dims.ancho || 0);
+                        
                         const capacityResult = calculateMaxCapacity(totalLargo, totalAncho);
                         calculated_capacity = capacityResult.capacity; 
                         winning_clearance = capacityResult.clearance;
+                        
                         balonesCount = Math.floor(calculated_capacity / 10);
+                        // El área útil no se puede calcular tan fácil por la lógica de pasillos,
+                        // pero para el reporte, usaremos el área basada en el despeje ganador
                         const usableLargo = totalLargo - (winning_clearance * 2);
                         const usableAncho = totalAncho - (winning_clearance * 2);
                         area = (usableLargo > 0 && usableAncho > 0) ? (usableLargo * usableAncho) : 0;
+                        
                         const base_legal_limit = 5000; 
+                        
                         const ventilacionMetros = parseFloat(userData.answers.ventilation_size || 0);
                         let ventilacion_limit = 0;
-                        if (ventilacionMetros >= 30) { ventilacion_limit = 5000; }
-                        else if (ventilacionMetros >= 24) { ventilacion_limit = 4000; }
-                        else if (ventilacionMetros >= 18) { ventilacion_limit = 3000; }
-                        else if (ventilacionMetros >= 12) { ventilacion_limit = 2000; }
-                        else if (ventilacionMetros >= 6) { ventilacion_limit = 1000; }
+                        if (ventilacionMetros >= 30) {
+                            ventilacion_limit = 5000;
+                        } else if (ventilacionMetros >= 24) {
+                            ventilacion_limit = 4000;
+                        } else if (ventilacionMetros >= 18) {
+                            ventilacion_limit = 3000;
+                        } else if (ventilacionMetros >= 12) {
+                            ventilacion_limit = 2000;
+                        } else if (ventilacionMetros >= 6) { 
+                            ventilacion_limit = 1000;
+                        }
+                        
                         const hayPisosArriba = userData.answers.pisos_superiores === 'Sí, hay pisos arriba';
                         const pisos_limit = hayPisosArriba ? PISOS_SUPERIORES_LIMIT : Infinity;
+
                         legal_limit = Math.min(base_legal_limit, ventilacion_limit, pisos_limit, public_limit);
                         final_capacity = Math.min(legal_limit, calculated_capacity);
-                        if (final_capacity < calculated_capacity) { balonesCount = Math.floor(final_capacity / 10); }
+                        
+                        if (final_capacity < calculated_capacity) {
+                            balonesCount = Math.floor(final_capacity / 10);
+                        }
+
                         capacityLimits = {
-                            base: base_legal_limit, ventilacion: ventilacion_limit,
+                            base: base_legal_limit,
+                            ventilacion: ventilacion_limit,
                             pisos_superiores: hayPisosArriba ? PISOS_SUPERIORES_LIMIT : 'No aplica',
                             publico: (public_limit === Infinity) ? 'No aplica' : public_limit,
-                            por_espacio: calculated_capacity, despeje_requerido: winning_clearance
+                            por_espacio: calculated_capacity,
+                            despeje_requerido: winning_clearance
                         };
                         break;
 
@@ -1162,35 +1269,48 @@
                         const dims_3 = userData.answers.storage_dimensions || {};
                         const totalLargo_3 = parseFloat(dims_3.largo || 0);
                         const totalAncho_3 = parseFloat(dims_3.ancho || 0);
+                        
                         const capacityResult_3 = calculateMaxCapacity(totalLargo_3, totalAncho_3);
                         calculated_capacity = capacityResult_3.capacity;
                         winning_clearance = capacityResult_3.clearance;
+
                         balonesCount = Math.floor(calculated_capacity / 10);
                         const usableLargo_3 = totalLargo_3 - (winning_clearance * 2);
                         const usableAncho_3 = totalAncho_3 - (winning_clearance * 2);
                         area = (usableLargo_3 > 0 && usableAncho_3 > 0) ? (usableLargo_3 * usableAncho_3) : 0;
+                        
                         const base_legal_limit_3 = 50000;
                         legal_limit = Math.min(base_legal_limit_3, public_limit);
                         final_capacity = Math.min(legal_limit, calculated_capacity);
-                        if (final_capacity < calculated_capacity) { balonesCount = Math.floor(final_capacity / 10); }
+
+                        if (final_capacity < calculated_capacity) {
+                            balonesCount = Math.floor(final_capacity / 10);
+                        }
+
                         capacityLimits = {
-                            base: base_legal_limit_3, ventilacion: 'No aplica', pisos_superiores: 'No aplica',
+                            base: base_legal_limit_3,
+                            ventilacion: 'No aplica',
+                            pisos_superiores: 'No aplica',
                             publico: (public_limit === Infinity) ? 'No aplica' : public_limit,
-                            por_espacio: calculated_capacity, despeje_requerido: winning_clearance
+                            por_espacio: calculated_capacity,
+                            despeje_requerido: winning_clearance
                         };
                         break;
                 }
                 
                 userData.capacity = {
-                    legal_limit: legal_limit, area: area, calculated_capacity: calculated_capacity,
-                    final_capacity: final_capacity, balones_count: balonesCount, limits: capacityLimits
+                    legal_limit: legal_limit,
+                    area: area,
+                    calculated_capacity: calculated_capacity,
+                    final_capacity: final_capacity,
+                    balones_count: balonesCount,
+                    limits: capacityLimits
                 };
 
             } else {
-                userData.result = 'No Aprobado'; // ROJO
+                userData.result = 'No Aprobado';
                 userData.capacity = null;
             }
-            // --- FIN DEL CAMBIO DE LÓGICA ---
 
             showResults();
             goToStep(3);
@@ -1198,22 +1318,18 @@
 
         function showResults() {
             resultContainer.innerHTML = '';
-            
-            // --- CAMBIO AQUÍ: Lógica de visualización para 3 estados ---
-            
-            let capacityHTML = '';
             let recommendationsHTML = '';
-
-            // 1. Preparar HTML de Recomendaciones (si existen)
+            
             if(userData.recommendations.length > 0) {
                 userData.recommendations.forEach(rec => {
                     recommendationsHTML += `<div class="recommendation-item">💡 ${rec}</div>`;
                 });
             }
 
-            // 2. Preparar HTML de Capacidad (si se aprobó)
-            if (userData.capacity) {
+            if (userData.result === 'Aprobado') {
                 const cap = userData.capacity;
+                let capacityHTML = '';
+
                 if (selectedOption === '1') {
                      capacityHTML = `
                         <p>Tu modalidad es RACK/JAULA. El límite es fijo.</p>
@@ -1222,6 +1338,7 @@
                      `;
                 } else {
                      const dims = userData.answers.storage_dimensions;
+                     
                      let ventilacionHTML = '';
                      let pisosHTML = '';
                      let publicoHTML = '';
@@ -1231,6 +1348,7 @@
                         let pisosLimitText = (typeof cap.limits.pisos_superiores === 'number') ? cap.limits.pisos_superiores.toLocaleString() : cap.limits.pisos_superiores;
                         pisosHTML = `<li>Límite por Pisos Superiores: <strong>${pisosLimitText} kg</strong></li>`;
                      }
+
                      let publicoLimitText = (typeof cap.limits.publico === 'number') ? cap.limits.publico.toLocaleString() : cap.limits.publico;
                      if (publicoLimitText !== 'No aplica') {
                          publicoHTML = `<li>Límite por Afluencia de Público: <strong>${publicoLimitText} kg</strong></li>`;
@@ -1239,7 +1357,9 @@
                      capacityHTML = `
                         <p>Tu espacio TOTAL mide: <strong>${parseFloat(dims.largo).toFixed(1)}m x ${parseFloat(dims.ancho).toFixed(1)}m</strong></p>
                         <p>Considerando un despeje óptimo de <strong>${cap.limits.despeje_requerido}m</strong> (y pasillos si son necesarios), tu capacidad MÁXIMA por ESPACIO ÚTIL ("El Ganador") es: <strong>${Math.floor(cap.limits.por_espacio).toLocaleString()} kg</strong></p>
+                        
                         <hr style="margin: 10px 0;">
+                        
                         <p style="text-align:center;"><strong>Límites Reglamentarios (Se aplica el más bajo):</strong></p>
                         <ul>
                             <li>Límite por tipo de Local (${userData.optionText}): <strong>${cap.limits.base.toLocaleString()} kg</strong></li>
@@ -1247,71 +1367,49 @@
                             ${pisosHTML}
                             ${publicoHTML}
                         </ul>
+                        
                         <p style="text-align:center;">Tu Límite Legal (el menor de los de arriba) es: <strong>${cap.legal_limit.toLocaleString()} kg</strong></p>
+                        
                         <hr style="margin: 10px 0;">
+                        
                         <p class="final-capacity">Capacidad Máxima Aprobada: ${Math.floor(cap.final_capacity).toLocaleString()} kg</p>
                         <small style="text-align:center; display:block;">(Equivalente a ${cap.balones_count} balones de 10kg)</small>
                         <small style="text-align:center; display:block;">(Se aprueba el valor más bajo entre tu Límite Legal y tu Capacidad por Espacio)</small>
                     `;
                 }
-            }
-            
-            // 3. Mostrar el resultado (VERDE, AMARILLO o ROJO)
-            switch(userData.result) {
-                
-                case 'Aprobado': // VERDE
-                    resultContainer.innerHTML = `
-                        <div class="result success">
-                            <div class="result-icon">🎉</div>
-                            <h3>¡Felicidades! Local APROBADO</h3>
-                            <p>Has pasado la pre-evaluación. Tu local cumple con todos los requisitos críticos y no tiene observaciones.</p>
-                            <div class="capacity-box">
-                                ${capacityHTML}
-                            </div>
-                            <p style="margin-top: 15px; font-weight: bold;">Acércate a la oficina de Osinergmin con tu DNI. Tus respuestas están guardadas para generar tu Declaración Jurada.</p>
-                        </div>
-                        `;
-                    break;
-                
-                case 'Aprobado con Observaciones': // AMARILLO
-                     resultContainer.innerHTML = `
-                        <div class="result warning">
-                            <div class="result-icon">⚠️</div>
-                            <h3>Local APROBADO (Con Observaciones)</h3>
-                            <p>Has pasado la pre-evaluación de seguridad, pero tenemos las siguientes recomendaciones para mejorar tu local.</p>
-                            
-                            <div class="capacity-box">
-                                ${capacityHTML}
-                            </div>
-                            
-                            ${recommendationsHTML} 
-                            
-                            <p style="margin-top: 15px; font-weight: bold;">Puedes acercarte a la oficina de Osinergmin con tu DNI. Tus respuestas están guardadas.</p>
-                        </div>
-                    `;
-                    break;
-                
-                case 'No Aprobado': // ROJO
-                    let failuresHTML = '<div class="failures-list"><h4>Debes corregir los siguientes puntos críticos:</h4>';
-                    userData.failures.forEach(fail => {
-                        failuresHTML += `<div class="failure-item">❌ ${fail}</div>`;
-                    });
-                    failuresHTML += '</div>';
 
-                    resultContainer.innerHTML = `
-                        <div class="result danger">
-                            <div class="result-icon">🚫</div>
-                            <h3>Local NO APROBADO</h3>
-                            <p>Tu espacio no cumple con uno o más requisitos críticos de seguridad.</p>
-                            ${failuresHTML}
-                            <p style="margin-top:20px;">Por favor, realiza las mejoras y vuelve a intentarlo. ¡Estamos para ayudarte!</p>
+                resultContainer.innerHTML = `
+                    <div class="result success">
+                        <div class="result-icon">🎉</div>
+                        <h3>¡Felicidades! Local APROBADO</h3>
+                        <p>Has pasado la pre-evaluación de seguridad. Tu espacio cumple con los requisitos críticos.</p>
+                        
+                        <div class="capacity-box">
+                            ${capacityHTML}
                         </div>
-                        ${recommendationsHTML}
-                    `;
-                    break;
-            }
-            // --- FIN DEL CAMBIO DE VISUALIZACIÓN ---
+                        
+                        <p style="margin-top: 15px; font-weight: bold;">Acércate a la oficina de Osinergmin con tu DNI. Tus respuestas están guardadas para generar tu Declaración Jurada.</p>
+                    </div>
+                     ${recommendationsHTML}
+                `;
+            } else {
+                let failuresHTML = '<div class="failures-list"><h4>Debes corregir los siguientes puntos críticos:</h4>';
+                userData.failures.forEach(fail => {
+                    failuresHTML += `<div class="failure-item">❌ ${fail}</div>`;
+                });
+                failuresHTML += '</div>';
 
+                resultContainer.innerHTML = `
+                    <div class="result danger">
+                        <div class="result-icon">🚫</div>
+                        <h3>Local NO APROBADO</h3>
+                        <p>Tu espacio no cumple con uno o más requisitos críticos de seguridad.</p>
+                        ${failuresHTML}
+                        <p style="margin-top:20px;">Por favor, realiza las mejoras y vuelve a intentarlo. ¡Estamos para ayudarte!</p>
+                    </div>
+                    ${recommendationsHTML}
+                `;
+            }
 
             if (userData.dni) {
                 localStorage.setItem(`evaluacion_${userData.dni}`, JSON.stringify(userData));
@@ -1320,28 +1418,33 @@
             declaration.classList.remove('hidden');
         }
 
-        // (El resto de funciones no necesitan cambios)
-
         function generateDeclaration() {
             declDni.textContent = userData.dni || 'No registrado';
             let contenido = `
                 <p><strong>Tipo de Almacén:</strong> ${userData.optionText}</p>
                 <p><strong>Resultado:</strong> ${userData.result}</p>
-                ${userData.result.includes('Aprobado') ? `<p><strong>Capacidad Aprobada:</strong> ${Math.floor(userData.capacity.final_capacity).toLocaleString()} kg (${userData.capacity.balones_count} balones)</p>` : ''}
+                
+                ${userData.result === 'Aprobado' ? `<p><strong>Capacidad Aprobada:</strong> ${Math.floor(userData.capacity.final_capacity).toLocaleString()} kg (${userData.capacity.balones_count} balones)</p>` : ''}
+                
                 <strong>Respuestas Marcadas:</strong>
                 <ul>
             `;
+            
             currentQuestionSet.forEach(q => {
                 const answer = userData.answers[q.id];
                 let answerText = answer;
+
                 if(typeof answer === 'object' && answer !== null) {
                     answerText = `Largo: ${answer.largo}m, Ancho: ${answer.ancho}m`;
                 }
+                
                 if(answer !== 'N/A (Saltada)') {
                      contenido += `<li><strong>${q.text}:</strong> ${answerText}</li>`;
                 }
             });
+            
             contenido += `</ul>`;
+            
             if (userData.failures.length > 0) {
                  contenido += `<p><strong>Puntos Críticos Fallidos:</strong></p><ul>`;
                  userData.failures.forEach(f => { contenido += `<li>${f}</li>`; });
@@ -1352,6 +1455,7 @@
                  userData.recommendations.forEach(r => { contenido += `<li>${r}</li>`; });
                  contenido += `</ul>`;
             }
+
             declarationContent.innerHTML = contenido;
         }
 
@@ -1364,14 +1468,21 @@
             currentQuestionIndex = 0;
             selectedOption = null;
             
+            // --- Resetear los questionSets ---
+            // Esto es un poco "feo" pero asegura que se reinicien si se modificaron
             const basePublicQuestions = [
                 { id: 'public_nearby', text: '¿Existen lugares de afluencia de público cercanos? ...', type: 'binary', options: ['Sí, hay uno cerca', 'No hay ninguno'], critical: false },
                 { id: 'public_distance', text: '¿A cuántos metros está el lugar de afluencia de público más cercano?', type: 'number', helpText: 'Mida la distancia...', critical: false, dependsOn: { id: 'public_nearby', value: 'Sí, hay uno cerca' }, condition: (answer) => true, failureMessage: '' }
             ];
+
+            // Filtrar las preguntas viejas
             questionSets[2] = questionSets[2].filter(q => q.id !== 'public_nearby' && q.id !== 'public_distance');
             questionSets[3] = questionSets[3].filter(q => q.id !== 'public_nearby' && q.id !== 'public_distance');
-            questionSets[2].splice(5, 0, ...basePublicQuestions.map(q => ({...q})));
+            
+            // Re-añadir las preguntas en la posición correcta (regenerándolas por si acaso)
+            questionSets[2].splice(5, 0, ...basePublicQuestions.map(q => ({...q}))); // Copia profunda simple
             questionSets[3].splice(3, 0, ...basePublicQuestions.map(q => ({...q}))); 
+            // --- Fin Reseteo ---
 
             currentQuestionSet = [];
             userData.option = '';
